@@ -19,6 +19,7 @@ const connectDb= async () => {
     }
 
     if(!cached.promise){
+        console.log("new connection")
         cached.promise=mongoose.connect(mongodbUrl).then(c=>c.connection)
     }
 
