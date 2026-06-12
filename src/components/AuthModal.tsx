@@ -2,19 +2,20 @@
 
 import React, { useState } from "react";
 import { motion } from "motion/react";
-import { Lock, Mail, X } from "lucide-react";
+import { Lock, Mail, User, X } from "lucide-react";
 import Image from "next/image";
 import googleLogo from "../../public/google.jpg";
-
 
 type PropType = {
   open: boolean;
   onClose: () => void;
 };
+
 type stepType = "login" | "signup" | "otp";
 
 const AuthModal = ({ open, onClose }: PropType) => {
   const [step, setStep] = useState<stepType>("login");
+
   if (!open) return null;
 
   return (
@@ -47,16 +48,24 @@ const AuthModal = ({ open, onClose }: PropType) => {
 
           {/* Header */}
           <div className="mb-6 text-center">
-            <h1 className="text-3xl font-extrabold tracking-widest">Vehicle</h1>
+            <h1 className="text-3xl font-extrabold tracking-widest">
+              Vehicle
+            </h1>
             <p className="mt-1 text-xs text-gray-500">
               Premium Vehicle Booking
             </p>
           </div>
 
           <button className="w-full h-11 rounded-xl border border-black/20 flex items-center justify-center gap-3 text-sm font-semibold hover:bg-black hover:text-white transition">
-            <Image src={"/google.jpg"} alt="google" width={20} height={20} />
+            <Image
+              src="/google.jpg"
+              alt="google"
+              width={20}
+              height={20}
+            />
             Continue with Google
           </button>
+
           <div className="flex items-center gap-4 my-6">
             <div className="flex-1 h-px bg-black/10" />
             <div className="text-xs text-gray-500">OR</div>
@@ -81,6 +90,7 @@ const AuthModal = ({ open, onClose }: PropType) => {
                     className="w-full bg-transparent outline-none text-sm"
                   />
                 </div>
+
                 <div className="flex items-center gap-3 border border-black/20 rounded-xl px-4 py-3">
                   <Lock size={18} className="text-gray-500" />
 
@@ -90,9 +100,78 @@ const AuthModal = ({ open, onClose }: PropType) => {
                     className="w-full bg-transparent outline-none text-sm"
                   />
                 </div>
-                <button className='w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 transition'>Login</button>
 
-                <p className='mt-6 text-center text-sm text=gray-500'>Don't have an account? <div onClick ={() => setStep("signup")}className='text-black font-medium hover:underline'>Sign Up</div></p>
+                <button className="w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 transition">
+                  Login
+                </button>
+
+                <p className="mt-6 text-center text-sm text-gray-500">
+                  Don't have an account?{" "}
+                  <button
+                    type="button"
+                    onClick={() => setStep("signup")}
+                    className="text-black font-medium hover:underline"
+                  >
+                    Sign Up
+                  </button>
+                </p>
+              </motion.div>
+            )}
+
+            {step === "signup" && (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="mt-4 space-y-4"
+              >
+                <h1 className="text-xl font-semibold">
+                  Create Account
+                </h1>
+
+                <div className="flex items-center gap-3 border border-black/20 rounded-xl px-4 py-3">
+                  <User size={18} className="text-gray-500" />
+
+                  <input
+                    type="text"
+                    placeholder="Full Name"
+                    className="w-full bg-transparent outline-none text-sm"
+                  />
+                </div>
+
+                <div className="flex items-center gap-3 border border-black/20 rounded-xl px-4 py-3">
+                  <Mail size={18} className="text-gray-500" />
+
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    className="w-full bg-transparent outline-none text-sm"
+                  />
+                </div>
+
+                <div className="flex items-center gap-3 border border-black/20 rounded-xl px-4 py-3">
+                  <Lock size={18} className="text-gray-500" />
+
+                  <input
+                    type="password"
+                    placeholder="Password"
+                    className="w-full bg-transparent outline-none text-sm"
+                  />
+                </div>
+
+                <button className="w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 transition">
+                  Create Account
+                </button>
+
+                <p className="mt-6 text-center text-sm text-gray-500">
+                  Already have an account?{" "}
+                  <button
+                    type="button"
+                    onClick={() => setStep("login")}
+                    className="text-black font-medium hover:underline"
+                  >
+                    Login
+                  </button>
+                </p>
               </motion.div>
             )}
           </div>
