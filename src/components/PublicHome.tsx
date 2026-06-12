@@ -6,7 +6,7 @@ import AuthModal from './AuthModal'
 
 
 const PublicHome = () => {
-    const [authOpen, setAuthOpen] = useState(false)
+    const [authOpen, setAuthOpen] = useState(true)
   return (
     <>
       <HeroSection/>
