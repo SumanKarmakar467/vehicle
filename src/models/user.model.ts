@@ -5,7 +5,7 @@ interface IUser extends Document{
     email:string;
     password:string;
     createdAt:Date;
-    upatedAt:Date;
+    updatedAt:Date;
 }
 
 const userSchema= new mongoose.Schema<IUser>({
