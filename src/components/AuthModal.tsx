@@ -2,11 +2,11 @@
 
 import React, { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { Lock, Mail, User, X } from "lucide-react";
+import { CircleDashed, Lock, Mail, User, X } from "lucide-react";
 import Image from "next/image";
 import googleLogo from "../../public/google.jpg";
 import { exit } from "process";
-
+import axios from "axios";
 
 type PropType = {
   open: boolean;
@@ -18,6 +18,28 @@ type stepType = "login" | "signup" | "otp";
 const AuthModal = ({ open, onClose }: PropType) => {
   const [step, setStep] = useState<stepType>("login");
 
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] =useState("")
+
+  const handleSignUp = async () => {
+    setLoading(true);
+    try {
+      const { data } = await axios.post("/api/auth/register", {
+        name,
+        email,
+        password,
+      });
+      console.log(data);
+      setLoading(false);
+    } catch (error:any) {
+      setLoading(false);
+      setErr(error.response.data.message ?? "something went wrong");
+    }
+  };
+
   if (!open) return null;
 
   return (
@@ -26,7 +48,7 @@ const AuthModal = ({ open, onClose }: PropType) => {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        exit={{opacity:0}}
+        exit={{ opacity: 0 }}
         className="fixed inset-0 z-[90] bg-black/80 backdrop-blur-md"
       />
 
@@ -35,7 +57,7 @@ const AuthModal = ({ open, onClose }: PropType) => {
         initial={{ opacity: 0, scale: 0.95, y: 40 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.35, ease: "easeOut" }}
-        exit={{opacity: 0, scale: 0.95, y: 40 }}
+        exit={{ opacity: 0, scale: 0.95, y: 40 }}
         className="fixed inset-0 z-[100] flex items-center justify-center px-4"
       >
         <div
@@ -52,21 +74,14 @@ const AuthModal = ({ open, onClose }: PropType) => {
 
           {/* Header */}
           <div className="mb-6 text-center">
-            <h1 className="text-3xl font-extrabold tracking-widest">
-              Vehicle
-            </h1>
+            <h1 className="text-3xl font-extrabold tracking-widest">Vehicle</h1>
             <p className="mt-1 text-xs text-gray-500">
               Premium Vehicle Booking
             </p>
           </div>
 
           <button className="w-full h-11 rounded-xl border border-black/20 flex items-center justify-center gap-3 text-sm font-semibold hover:bg-black hover:text-white transition">
-            <Image
-              src="/google.jpg"
-              alt="google"
-              width={20}
-              height={20}
-            />
+            <Image src="/google.jpg" alt="google" width={20} height={20} />
             Continue with Google
           </button>
 
@@ -92,6 +107,8 @@ const AuthModal = ({ open, onClose }: PropType) => {
                     type="email"
                     placeholder="Email"
                     className="w-full bg-transparent outline-none text-sm"
+                    onChange={(e) => setEmail(e.target.value)}
+                    value={email}
                   />
                 </div>
 
@@ -102,6 +119,8 @@ const AuthModal = ({ open, onClose }: PropType) => {
                     type="password"
                     placeholder="Password"
                     className="w-full bg-transparent outline-none text-sm"
+                    onChange={(e) => setPassword(e.target.value)}
+                    value={password}
                   />
                 </div>
 
@@ -128,9 +147,7 @@ const AuthModal = ({ open, onClose }: PropType) => {
                 animate={{ opacity: 1, x: 0 }}
                 className="mt-4 space-y-4"
               >
-                <h1 className="text-xl font-semibold">
-                  Create Account
-                </h1>
+                <h1 className="text-xl font-semibold">Create Account</h1>
 
                 <div className="flex items-center gap-3 border border-black/20 rounded-xl px-4 py-3">
                   <User size={18} className="text-gray-500" />
@@ -139,6 +156,8 @@ const AuthModal = ({ open, onClose }: PropType) => {
                     type="text"
                     placeholder="Full Name"
                     className="w-full bg-transparent outline-none text-sm"
+                    onChange={(e) => setName(e.target.value)}
+                    value={name}
                   />
                 </div>
 
@@ -149,6 +168,8 @@ const AuthModal = ({ open, onClose }: PropType) => {
                     type="email"
                     placeholder="Email"
                     className="w-full bg-transparent outline-none text-sm"
+                    onChange={(e) => setEmail(e.target.value)}
+                    value={email}
                   />
                 </div>
 
@@ -159,11 +180,27 @@ const AuthModal = ({ open, onClose }: PropType) => {
                     type="password"
                     placeholder="Password"
                     className="w-full bg-transparent outline-none text-sm"
+                    onChange={(e) => setPassword(e.target.value)}
+                    value={password}
                   />
                 </div>
 
-                <button className="w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 transition">
-                  Create Account
+                {err && <p className='text-red-500 '>*{err}</p>}
+
+                <button
+                  className="w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 transition flex justify-center"
+                  disabled={loading}
+                  onClick={handleSignUp}
+                >
+                  {!loading ? (
+                    "Sign Up"
+                  ) : (
+                    <CircleDashed
+                      size={18}
+                      color="white"
+                      className="animate-spin"
+                    />
+                  )}
                 </button>
 
                 <p className="mt-6 text-center text-sm text-gray-500">

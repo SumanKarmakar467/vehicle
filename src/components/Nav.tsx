@@ -40,7 +40,7 @@ const Nav = () => {
 
               return (
                 <Link
-                  key={index}
+                  key={item}
                   href={href}
                   className={`text-sm font-medium transition ${
                     active ? "text-white" : "text-gray-400 hover:text-white"
