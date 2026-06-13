@@ -2,12 +2,11 @@
 
 import React, { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { CircleDashed, Lock, Mail, User, X } from "lucide-react";
-import Image from "next/image";
-import googleLogo from "../../public/google.jpg";
-import { exit } from "process";
+import { CircleDashed, Image, Lock, Mail, User, X } from "lucide-react";
 import axios from "axios";
 import { signIn, useSession } from "next-auth/react";
+// import { Globe } from "lucide-react";
+
 
 type PropType = {
   open: boolean;
@@ -23,10 +22,10 @@ const AuthModal = ({ open, onClose }: PropType) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [err, setErr] =useState("")
+  const [err, setErr] = useState("");
 
-  const {data} =useSession()
-  console.log(data)
+  const { data } = useSession();
+  console.log(data);
   const handleSignUp = async () => {
     setLoading(true);
     try {
@@ -37,20 +36,34 @@ const AuthModal = ({ open, onClose }: PropType) => {
       });
       console.log(data);
       setLoading(false);
-    } catch (error:any) {
+    } catch (error: any) {
       setLoading(false);
       setErr(error.response.data.message ?? "something went wrong");
     }
   };
 
-  const handleLogin = async() => {
-    setLoading(true)
-    const res=await signIn("credentials",{
-      email,password,redirect:false
-    })
-    setLoading(false)
-    console.log(res)
-  }
+  const handleLogin = async () => {
+    setLoading(true);
+    const res = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
+    setLoading(false);
+    console.log(res);
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      const res = await signIn("google", {
+        callbackUrl: "/",
+      });
+
+      console.log(res);
+    } catch (err) {
+      console.log("Google Login Error:", err);
+    }
+  };
 
   if (!open) return null;
 
@@ -92,7 +105,10 @@ const AuthModal = ({ open, onClose }: PropType) => {
             </p>
           </div>
 
-          <button className="w-full h-11 rounded-xl border border-black/20 flex items-center justify-center gap-3 text-sm font-semibold hover:bg-black hover:text-white transition">
+          <button
+            className="w-full h-11 rounded-xl border border-black/20 flex items-center justify-center gap-3 text-sm font-semibold hover:bg-black hover:text-white transition-all duration-300"
+            onClick={handleGoogleLogin}
+          >
             <Image src="/google.jpg" alt="google" width={20} height={20} />
             Continue with Google
           </button>
@@ -136,7 +152,8 @@ const AuthModal = ({ open, onClose }: PropType) => {
                   />
                 </div>
 
-                <button className="w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 transition"
+                <button
+                  className="w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 transition"
                   onClick={handleLogin}
                 >
                   {!loading ? (
@@ -207,7 +224,7 @@ const AuthModal = ({ open, onClose }: PropType) => {
                   />
                 </div>
 
-                {err && <p className='text-red-500 '>*{err}</p>}
+                {err && <p className="text-red-500 ">*{err}</p>}
 
                 <button
                   className="w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 transition flex justify-center"
