@@ -54,7 +54,9 @@ const AuthModal = ({ open, onClose }: PropType) => {
         email,
         otp:otp.join("")
       });
-      console.log(data)
+      
+      setOtp(["", "", "", "", "", ""])
+      setErr("")
       setStep("login")
       setLoading(false);
     } catch (error: any) {
@@ -317,7 +319,7 @@ const AuthModal = ({ open, onClose }: PropType) => {
                   ))}
                 </div>
                 {err && <p className="text-red-500 ">*{err}</p>}
-                <button className='mt-6 w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 transition' onClick={handleVerifyEmail}>{!loading ? (
+                <button className='mt-6 w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 flex justify-center items-center transition' onClick={handleVerifyEmail}>{!loading ? (
                     "Verify & Create Account"
                   ) : (
                     <CircleDashed

@@ -10,7 +10,7 @@ type HeroSectionProps = {
 
 const HeroSection = ({ onAuthRequired }: HeroSectionProps) => {
   return (
-    <div className="relative min-h-screen w-full overflow-hidden">
+    <div className="relative h-screen w-full overflow-hidden">
       <div
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: "url('/heroImage.jpg')" }}
@@ -18,7 +18,7 @@ const HeroSection = ({ onAuthRequired }: HeroSectionProps) => {
 
       <div className="absolute inset-0 bg-black/80" />
 
-      <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 text-center">
+      <div className="relative z-10 h-full flex flex-col items-center justify-center px-4 text-center">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
