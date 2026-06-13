@@ -13,7 +13,8 @@ const useGetMe = (enabled: boolean) => {
     const getMe = async () => {
       try {
         const { data } = await axios.get("/api/user/me");
-        dispatch(setUserData(data));
+        dispatch(setUserData(data.user));
+        console.log(data)
       } catch (error) {
         console.error(error);
       }

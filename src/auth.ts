@@ -46,55 +46,59 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
     Google({
-        clientId:process.env.AUTH_GOOGLE_ID,
-        clientSecret:process.env.AUTH_GOOGLE_SECRET
-    })
+      clientId: process.env.AUTH_GOOGLE_ID,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+    }),
   ],
   callbacks: {
-    async signIn({user, account}){
-        if(account?.provider=="google"){
-            await connectDb()
-            const dbUser= await User.findOne({email:user.email})
+    async signIn({ user, account }) {
+      if (account?.provider === "google") {
+        await connectDb();
 
-            if(!dbUser){
-                await User.create({
-                    name:user.name,
-                    email:user.email
-                })
-            }
+        let dbUser = await User.findOne({
+          email: user.email,
+        });
 
-            user.id=dbUser._id
-            user.role=dbUser.role
+        if (!dbUser) {
+          dbUser = await User.create({
+            name: user.name,
+            email: user.email,
+          });
         }
-        return true
+
+        user.id = dbUser._id.toString();
+        user.role = dbUser.role;
+      }
+
+      return true;
     },
     async jwt({ token, user }) {
-      if(user){
-        (token.name = user.name),
-        (token.id = user.id),
-        (token.email = user.email),
-        (token.role = user.role);
+      if (user) {
+        ((token.name = user.name),
+          (token.id = user.id),
+          (token.email = user.email),
+          (token.role = user.role));
       }
 
       return token;
     },
     async session({ token, session }) {
       if (session.user) {
-        session.user.name = token.name,
-          session.user.id = token.id as string,
-          session.user.email = token.email as string,
-          session.user.role = token.role as string
+        ((session.user.name = token.name),
+          (session.user.id = token.id as string),
+          (session.user.email = token.email as string),
+          (session.user.role = token.role as string));
       }
-      return session
+      return session;
     },
   },
-  pages:{
-    signIn:"/signIn",
-    error:"/signIn"
+  pages: {
+    signIn: "/signIn",
+    error: "/signIn",
   },
-  session:{
-    strategy:"jwt",
-    maxAge:10*24*60*60
+  session: {
+    strategy: "jwt",
+    maxAge: 10 * 24 * 60 * 60,
   },
-  secret:process.env.AUTH_SECRET
+  secret: process.env.AUTH_SECRET,
 });
