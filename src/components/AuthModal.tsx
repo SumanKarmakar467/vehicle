@@ -7,6 +7,7 @@ import Image from "next/image";
 import googleLogo from "../../public/google.jpg";
 import { exit } from "process";
 import axios from "axios";
+import { signIn, useSession } from "next-auth/react";
 
 type PropType = {
   open: boolean;
@@ -24,6 +25,8 @@ const AuthModal = ({ open, onClose }: PropType) => {
   const [loading, setLoading] = useState(false);
   const [err, setErr] =useState("")
 
+  const {data} =useSession()
+  console.log(data)
   const handleSignUp = async () => {
     setLoading(true);
     try {
@@ -39,6 +42,15 @@ const AuthModal = ({ open, onClose }: PropType) => {
       setErr(error.response.data.message ?? "something went wrong");
     }
   };
+
+  const handleLogin = async() => {
+    setLoading(true)
+    const res=await signIn("credentials",{
+      email,password,redirect:false
+    })
+    setLoading(false)
+    console.log(res)
+  }
 
   if (!open) return null;
 
@@ -124,8 +136,18 @@ const AuthModal = ({ open, onClose }: PropType) => {
                   />
                 </div>
 
-                <button className="w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 transition">
-                  Login
+                <button className="w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 transition"
+                  onClick={handleLogin}
+                >
+                  {!loading ? (
+                    "Log In"
+                  ) : (
+                    <CircleDashed
+                      size={18}
+                      color="white"
+                      className="animate-spin"
+                    />
+                  )}
                 </button>
 
                 <p className="mt-6 text-center text-sm text-gray-500">
