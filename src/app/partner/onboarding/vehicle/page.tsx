@@ -15,7 +15,7 @@ const VEHICLES = [
 
 const Page = () => {
   const router = useRouter();
-  const [vehicleType, setVehicleType] = useState("");
+  const [vehicleType, setVehicleType] = usState("");
   const [vehicleNumber, setVehicleNumber] = useState("");
   const [vehicleModel, setVehicleModel] = useState("");
   
