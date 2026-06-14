@@ -4,29 +4,42 @@ import { AnimatePresence, motion } from "motion/react";
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import AuthModal from "./AuthModal";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
-import { Bike, Car, ChevronRight, LogOut, Menu, Truck, X } from "lucide-react";
+import {
+  Bike,
+  Car,
+  ChevronRight,
+  LogOut,
+  Menu,
+  Truck,
+  X,
+} from "lucide-react";
 import { signOut } from "next-auth/react";
 import { setUserData } from "@/redux/userSlice";
+
 const Nav_Items = ["Home", "Bookings", "About Us", "Contact"];
 
 const Nav = () => {
   const [authOpen, setAuthOpen] = useState(false);
-  const pathname = usePathname();
   const [profileopen, setProfileopen] = useState(false);
-  const { userData } = useSelector((state: RootState) => state.user);
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const { userData } = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch<AppDispatch>();
+
   const handleLogOut = async () => {
     await signOut({ redirect: false });
     dispatch(setUserData(null));
     setProfileopen(false);
+    router.push("/");
   };
-  console.log("Redux userData:", userData);
+
   return (
     <>
       <motion.div
@@ -37,15 +50,10 @@ const Nav = () => {
         <div className="max-w-7xl mx-auto px-4 md:px-8 flex items-center justify-between">
           <Image src="/logo.png" alt="logo" width={44} height={44} priority />
 
+          {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-10">
-            {Nav_Items.map((item, index) => {
-              let href;
-              if (item == "Home") {
-                href = "/";
-              } else {
-                href = "$/{item.toLowerCase()}";
-              }
-              href =
+            {Nav_Items.map((item) => {
+              const href =
                 item === "Home"
                   ? "/"
                   : `/${item.toLowerCase().replace(/\s+/g, "-")}`;
@@ -57,7 +65,9 @@ const Nav = () => {
                   key={item}
                   href={href}
                   className={`text-sm font-medium transition ${
-                    active ? "text-white" : "text-gray-400 hover:text-white"
+                    active
+                      ? "text-white"
+                      : "text-gray-400 hover:text-white"
                   }`}
                 >
                   {item}
@@ -67,7 +77,7 @@ const Nav = () => {
           </div>
 
           <div className="flex items-center gap-3 relative">
-            {/* Reponsive for desktop */}
+            {/* Desktop Profile */}
             <div className="hidden md:block relative">
               {!userData ? (
                 <button
@@ -80,10 +90,11 @@ const Nav = () => {
                 <>
                   <button
                     className="w-11 h-11 rounded-full bg-white text-black font-bold"
-                    onClick={() => setProfileopen((p) => !p)}
+                    onClick={() => setProfileopen((prev) => !prev)}
                   >
                     {userData?.name?.charAt(0)?.toUpperCase()}
                   </button>
+
                   <AnimatePresence>
                     {profileopen && (
                       <motion.div
@@ -96,11 +107,18 @@ const Nav = () => {
                           <p className="font-semibold text-lg">
                             {userData?.name}
                           </p>
+
                           <p className="text-xs uppercase text-gray-500 mb-4">
                             {userData?.role}
                           </p>
-                          {userData.role != "partner" && (
-                            <div className="w-full flex items-center gap-3 py-3 hover:bg-gray-100 rounded-xl">
+
+                          {userData?.role !== "partner" && (
+                            <button
+                              onClick={() =>
+                                router.push("/partner/onboarding/vehicle")
+                              }
+                              className="w-full flex items-center gap-3 py-3 hover:bg-gray-100 rounded-xl"
+                            >
                               <div className="flex -space-x-2">
                                 <div className="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center">
                                   <Bike size={16} />
@@ -112,9 +130,14 @@ const Nav = () => {
                                   <Truck size={16} />
                                 </div>
                               </div>
+
                               Become a Partner
-                              <ChevronRight size={16} className="ml-auto" />
-                            </div>
+
+                              <ChevronRight
+                                size={16}
+                                className="ml-auto"
+                              />
+                            </button>
                           )}
 
                           <button
@@ -132,7 +155,7 @@ const Nav = () => {
               )}
             </div>
 
-            {/* Responsive for Mobile */}
+            {/* Mobile Profile */}
             <div className="md:hidden">
               {!userData ? (
                 <button
@@ -142,20 +165,19 @@ const Nav = () => {
                   Login
                 </button>
               ) : (
-                <>
-                  <button
-                    className="w-11 h-11 rounded-full bg-white text-black font-bold"
-                    onClick={() => setProfileopen((p) => !p)}
-                  >
-                    {userData?.name?.charAt(0)?.toUpperCase()}
-                  </button>
-                </>
+                <button
+                  className="w-11 h-11 rounded-full bg-white text-black font-bold"
+                  onClick={() => setProfileopen((prev) => !prev)}
+                >
+                  {userData?.name?.charAt(0)?.toUpperCase()}
+                </button>
               )}
             </div>
 
+            {/* Mobile Menu Button */}
             <button
               className="md:hidden text-white"
-              onClick={() => setMenuOpen((p) => !p)}
+              onClick={() => setMenuOpen((prev) => !prev)}
             >
               {menuOpen ? <X size={26} /> : <Menu size={26} />}
             </button>
@@ -163,6 +185,7 @@ const Nav = () => {
         </div>
       </motion.div>
 
+      {/* Mobile Menu */}
       <AnimatePresence>
         {menuOpen && (
           <>
@@ -173,6 +196,7 @@ const Nav = () => {
               onClick={() => setMenuOpen(false)}
               className="fixed inset-0 bg-black z-30 md:hidden"
             />
+
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -181,25 +205,18 @@ const Nav = () => {
               className="fixed top-[85px] left-1/2 -translate-x-1/2 w-[92%] bg-[#0B0B0B] rounded-2xl shadow-2xl z-40 md:hidden overflow-hidden"
             >
               <div className="flex flex-col divide-y divide-white/10">
-                {Nav_Items.map((item, index) => {
-                  let href;
-                  if (item == "Home") {
-                    href = "/";
-                  } else {
-                    href = "$/{item.toLowerCase()}";
-                  }
-                  href =
+                {Nav_Items.map((item) => {
+                  const href =
                     item === "Home"
                       ? "/"
                       : `/${item.toLowerCase().replace(/\s+/g, "-")}`;
-
-                  const active = pathname === href;
 
                   return (
                     <Link
                       key={item}
                       href={href}
-                      className="flex px-6 py-4 text-gray-300 hover:bg-white/5"
+                      onClick={() => setMenuOpen(false)}
+                      className="px-6 py-4 text-gray-300 hover:bg-white/5"
                     >
                       {item}
                     </Link>
@@ -211,6 +228,7 @@ const Nav = () => {
         )}
       </AnimatePresence>
 
+      {/* Mobile Profile Drawer */}
       <AnimatePresence>
         {profileopen && userData && (
           <>
@@ -221,6 +239,7 @@ const Nav = () => {
               onClick={() => setProfileopen(false)}
               className="fixed inset-0 bg-black z-30 md:hidden"
             />
+
             <motion.div
               initial={{ y: 400 }}
               animate={{ y: 0 }}
@@ -230,11 +249,19 @@ const Nav = () => {
             >
               <div className="p-5">
                 <p className="font-semibold text-lg">{userData?.name}</p>
+
                 <p className="text-xs uppercase text-gray-500 mb-4">
                   {userData?.role}
                 </p>
-                {userData.role != "partner" && (
-                  <div className="w-full flex items-center gap-3 py-3 hover:bg-gray-100 rounded-xl">
+
+                {userData?.role !== "partner" && (
+                  <button
+                    onClick={() => {
+                      setProfileopen(false);
+                      router.push("/partner/onboarding/vehicle");
+                    }}
+                    className="w-full flex items-center gap-3 py-3 hover:bg-gray-100 rounded-xl"
+                  >
                     <div className="flex -space-x-2">
                       <div className="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center">
                         <Bike size={16} />
@@ -246,9 +273,11 @@ const Nav = () => {
                         <Truck size={16} />
                       </div>
                     </div>
+
                     Become a Partner
+
                     <ChevronRight size={16} className="ml-auto" />
-                  </div>
+                  </button>
                 )}
 
                 <button
@@ -263,7 +292,11 @@ const Nav = () => {
           </>
         )}
       </AnimatePresence>
-      <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
+
+      <AuthModal
+        open={authOpen}
+        onClose={() => setAuthOpen(false)}
+      />
     </>
   );
 };

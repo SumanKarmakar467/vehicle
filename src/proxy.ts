@@ -35,9 +35,14 @@ export async function proxy(req: NextRequest) {
     return NextResponse.redirect(new URL("/", req.url));
   }
 
-  if (pathname.startsWith("/partner") && role !== "partner") {
-    return NextResponse.redirect(new URL("/", req.url));
-  }
+  if (pathname.startsWith("/partner")){
+    if(pathname.startsWith("/partner/onboarding")){
+        return NextResponse.next()
+    }
+    if(role !== "partner"){
+        return NextResponse.redirect(new URL("/", req.url));
+    }
+  } 
 
   if (pathname.startsWith("/api") && !session.user) {
     return NextResponse.json(
