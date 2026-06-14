@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { motion } from "motion/react";
 import { ArrowLeft, Bike, Car, Package, Truck } from "lucide-react";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 const VEHICLES = [
   { id: "bike", label: "Bike", icon: Bike, desc: "2 wheeler" },
   { id: "auto", label: "Auto", icon: Car, desc: "3 wheeler ride" },
@@ -17,6 +18,16 @@ const Page = () => {
   const [vehicleType, setVehicleType] = useState("");
   const [vehicleNumber, setVehicleNumber] = useState("");
   const [vehicleModel, setVehicleModel] = useState("");
+  
+   const handleVehicle=async() => {
+    try{
+      const{data} = await axios.post("/api/partner/onboarding/vehicle",{type:vehicleType, number:vehicleNumber, vehicleModel})
+      console.log(data)
+    }
+    catch(error){
+      console.log(error)
+    }
+   }
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-4">
@@ -89,7 +100,7 @@ const Page = () => {
             <input
               type="text"
               value={vehicleNumber}
-              onChange={(e) => setVehicleNumber(e.target.value)}
+              onChange={(e) => setVehicleNumber(e.target.value.toUpperCase())}
               placeholder="MH12AB1234"
               id="vn"
               className="mt-2 w-full border-b border-gray-300 pb-2 text-sm focus:outline-none focus:border-black transition"
@@ -114,6 +125,7 @@ const Page = () => {
         <motion.div
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.97 }}
+          onClick={handleVehicle}
           className="mt-8 w-full h-14 rounded-2xl bg-black text-white font-semibold flex items-center justify-center gap-2 disabled:opacity-40 transition"
         >
           Continue
