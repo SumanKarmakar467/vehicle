@@ -17,7 +17,7 @@ const Page = () => {
   const router = useRouter();
   const [vehicleType, setVehicleType] = useState("");
   const [vehicleNumber, setVehicleNumber] = useState("");
-  const [vehicleModel, setVehiclModel] = useState("");
+  const [vehicleModel, setVehicleModel] = useState("");
   
    const handleVehicle=async() => {
     try{
