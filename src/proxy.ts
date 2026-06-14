@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "./auth";
 
 const PUBLIC_ROUTES = ["/"];
-const PUBLIC_APIS = ["/api/auth"];
+
 
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -10,7 +10,7 @@ export async function proxy(req: NextRequest) {
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon.ico") ||
-    pathname.startsWith(".")
+    /\.(png|jpg|jpeg|gif|svg|webp|ico)$/i.test(pathname)
   ) {
     return NextResponse.next();
   }
@@ -19,7 +19,7 @@ export async function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
-  if (PUBLIC_APIS.some(route => pathname.startsWith(route))) {
+  if (pathname.startsWith("/api/auth")) {
     return NextResponse.next();
   }
 
@@ -44,11 +44,13 @@ export async function proxy(req: NextRequest) {
     }
   } 
 
-  if (pathname.startsWith("/api") && !session.user) {
-    return NextResponse.json(
+  if (pathname.startsWith("/api")){
+    if(!session || !session.user){
+        return NextResponse.json(
       { message: "Unauthorized" },
       { status: 401 }
     );
+  }
   }
 
   return NextResponse.next();
@@ -56,4 +58,4 @@ export async function proxy(req: NextRequest) {
 
 export const config = {
   matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
-};
+}
