@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import {
   ArrowLeft,
@@ -40,27 +40,51 @@ const Page = () => {
 
       setLoading(true);
 
-      const { data } = await axios.post(
-        "/api/partner/onboarding/vehicle",
-        {
-          type: vehicleType,
-          number: vehicleNumber,
-          vehicleModel,
-        }
-      );
+      const { data } = await axios.post("/api/partner/onboarding/vehicle", {
+        type: vehicleType,
+        number: vehicleNumber,
+        vehicleModel,
+      });
 
       console.log(data);
 
       // Next step
       router.push("/partner/dashboard");
     } catch (error: any) {
-      setError(
-        error?.response?.data?.message ?? "Something went wrong"
-      );
+      setError(error?.response?.data?.message ?? "Something went wrong");
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const handleVehicleGet = async () => {
+      try {
+        setError("");
+
+        if (!vehicleType || !vehicleNumber || !vehicleModel) {
+          setError("Please fill all vehicle details");
+          return;
+        }
+
+        setLoading(true);
+
+        const { data } = await axios.get("/api/partner/onboarding/vehicle");
+
+        setVehicleType(data.type)
+        setVehicleNumber(data.number)
+        setVehicleModel(data.Vehiclemodel)
+
+        // Next step
+        router.push("/partner/dashboard");
+      } catch (error: any) {
+        setError(error?.response?.data?.message ?? "Something went wrong");
+      } finally {
+        setLoading(false);
+      }
+    }
+    handleVehicleGet()
+  },[]);
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-4">
@@ -79,13 +103,9 @@ const Page = () => {
             <ArrowLeft size={18} />
           </button>
 
-          <p className="text-xs text-gray-500 font-medium">
-            Step 3 of 3
-          </p>
+          <p className="text-xs text-gray-500 font-medium">Step 3 of 3</p>
 
-          <h1 className="text-2xl font-bold mt-1">
-            Vehicle Details
-          </h1>
+          <h1 className="text-2xl font-bold mt-1">Vehicle Details</h1>
 
           <p className="text-sm text-gray-500 mt-2">
             Add your vehicle information
@@ -118,23 +138,17 @@ const Page = () => {
                   >
                     <div
                       className={`w-11 h-11 rounded-full flex items-center justify-center ${
-                        active
-                          ? "bg-white text-black"
-                          : "bg-black text-white"
+                        active ? "bg-white text-black" : "bg-black text-white"
                       }`}
                     >
                       <Icon size={20} />
                     </div>
 
-                    <div className="text-sm font-semibold">
-                      {v.label}
-                    </div>
+                    <div className="text-sm font-semibold">{v.label}</div>
 
                     <p
                       className={`text-xs ${
-                        active
-                          ? "text-gray-300"
-                          : "text-gray-500"
+                        active ? "text-gray-300" : "text-gray-500"
                       }`}
                     >
                       {v.desc}
@@ -147,10 +161,7 @@ const Page = () => {
 
           {/* Vehicle Number */}
           <div>
-            <label
-              htmlFor="vn"
-              className="text-xs font-semibold text-gray-500"
-            >
+            <label htmlFor="vn" className="text-xs font-semibold text-gray-500">
               Vehicle Number
             </label>
 
@@ -158,9 +169,7 @@ const Page = () => {
               id="vn"
               type="text"
               value={vehicleNumber}
-              onChange={(e) =>
-                setVehicleNumber(e.target.value.toUpperCase())
-              }
+              onChange={(e) => setVehicleNumber(e.target.value.toUpperCase())}
               placeholder="WB12AB1234"
               className="mt-2 w-full border-b border-gray-300 pb-2 text-sm focus:outline-none focus:border-black transition"
             />
@@ -168,10 +177,7 @@ const Page = () => {
 
           {/* Vehicle Model */}
           <div>
-            <label
-              htmlFor="vm"
-              className="text-xs font-semibold text-gray-500"
-            >
+            <label htmlFor="vm" className="text-xs font-semibold text-gray-500">
               Vehicle Model
             </label>
 
@@ -179,9 +185,7 @@ const Page = () => {
               id="vm"
               type="text"
               value={vehicleModel}
-              onChange={(e) =>
-                setVehicleModel(e.target.value)
-              }
+              onChange={(e) => setVehicleModel(e.target.value)}
               placeholder="Tata Ace"
               className="mt-2 w-full border-b border-gray-300 pb-2 text-sm focus:outline-none focus:border-black transition"
             />
@@ -189,11 +193,7 @@ const Page = () => {
         </div>
 
         {/* Error */}
-        {error && (
-          <p className="text-red-500 text-sm mt-4">
-            * {error}
-          </p>
-        )}
+        {error && <p className="text-red-500 text-sm mt-4">* {error}</p>}
 
         {/* Submit Button */}
         <motion.button
