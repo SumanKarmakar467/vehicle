@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion } from "motion/react";
-import { ArrowLeft, FileCheck, UploadCloud } from "lucide-react";
+import { ArrowLeft, CircleDashed, FileCheck, UploadCloud } from "lucide-react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 
@@ -18,6 +18,7 @@ const Page = () => {
   });
 
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleImage = (doc: DocsType, file: File | null) => {
     if (!file) return;
@@ -28,41 +29,47 @@ const Page = () => {
     }));
   };
 
-  const handleDocs = async () => {
-    try {
-      if (!docs.aadhar || !docs.license || !docs.rc) {
-        alert("Please upload all required documents.");
-        return;
+const handleDocs = async () => {
+  setError("");
+
+  if (!docs.aadhar || !docs.license || !docs.rc) {
+    setError("Please upload all required documents.");
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    const formData = new FormData();
+
+    formData.append("aadhar", docs.aadhar);
+    formData.append("license", docs.license);
+    formData.append("rc", docs.rc);
+
+    const { data } = await axios.post(
+      "/api/partner/onboarding/documents",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       }
+    );
 
-      setLoading(true);
+    console.log(data);
 
-      const formData = new FormData();
+    router.push("/partner/onboarding/vehicle");
+  } catch (error: any) {
+    console.error(error);
 
-      formData.append("aadhar", docs.aadhar);
-      formData.append("license", docs.license);
-      formData.append("rc", docs.rc);
-
-      const { data } = await axios.post(
-        "/api/partner/onboarding/documents",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      console.log(data);
-
-      router.push("/partner/onboarding/vehicle");
-    } catch (error) {
-      console.error(error);
-      alert("Failed to upload documents.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    setError(
+      error?.response?.data?.message ??
+        "Failed to upload documents."
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-4">
@@ -83,9 +90,7 @@ const Page = () => {
 
           <p className="text-xs text-gray-500 font-medium">Step 2 of 3</p>
 
-          <h1 className="text-2xl font-bold mt-1">
-            Upload Documents
-          </h1>
+          <h1 className="text-2xl font-bold mt-1">Upload Documents</h1>
 
           <p className="text-sm text-gray-500 mt-2">
             Required for verification
@@ -100,9 +105,7 @@ const Page = () => {
             className="flex items-center justify-between p-4 rounded-2xl border border-gray-200 cursor-pointer hover:border-black transition"
           >
             <div>
-              <p className="text-sm font-semibold">
-                Aadhaar / ID Proof
-              </p>
+              <p className="text-sm font-semibold">Aadhaar / ID Proof</p>
               <p className="text-xs text-gray-500">
                 Government-issued ID
               </p>
@@ -123,10 +126,7 @@ const Page = () => {
               hidden
               accept="image/*,.pdf"
               onChange={(e) =>
-                handleImage(
-                  "aadhar",
-                  e.target.files?.[0] || null
-                )
+                handleImage("aadhar", e.target.files?.[0] || null)
               }
             />
           </motion.label>
@@ -137,9 +137,7 @@ const Page = () => {
             className="flex items-center justify-between p-4 rounded-2xl border border-gray-200 cursor-pointer hover:border-black transition"
           >
             <div>
-              <p className="text-sm font-semibold">
-                Driving License
-              </p>
+              <p className="text-sm font-semibold">Driving License</p>
               <p className="text-xs text-gray-500">
                 Valid driving license
               </p>
@@ -160,10 +158,7 @@ const Page = () => {
               hidden
               accept="image/*,.pdf"
               onChange={(e) =>
-                handleImage(
-                  "license",
-                  e.target.files?.[0] || null
-                )
+                handleImage("license", e.target.files?.[0] || null)
               }
             />
           </motion.label>
@@ -174,9 +169,7 @@ const Page = () => {
             className="flex items-center justify-between p-4 rounded-2xl border border-gray-200 cursor-pointer hover:border-black transition"
           >
             <div>
-              <p className="text-sm font-semibold">
-                Vehicle RC
-              </p>
+              <p className="text-sm font-semibold">Vehicle RC</p>
               <p className="text-xs text-gray-500">
                 Registration Certificate
               </p>
@@ -197,10 +190,7 @@ const Page = () => {
               hidden
               accept="image/*,.pdf"
               onChange={(e) =>
-                handleImage(
-                  "rc",
-                  e.target.files?.[0] || null
-                )
+                handleImage("rc", e.target.files?.[0] || null)
               }
             />
           </motion.label>
@@ -210,10 +200,16 @@ const Page = () => {
         <div className="mt-6 flex items-start gap-3 text-xs text-gray-500">
           <FileCheck size={18} />
           <p className="mt-0.5">
-            Documents are securely stored and manually
-            verified by our team.
+            Documents are securely stored and manually verified by our team.
           </p>
         </div>
+
+        {/* Error Message */}
+        {error && (
+          <p className="mt-4 text-center text-sm text-red-500">
+            {error}
+          </p>
+        )}
 
         {/* Submit Button */}
         <motion.button
@@ -223,7 +219,11 @@ const Page = () => {
           onClick={handleDocs}
           className="mt-8 w-full h-14 rounded-2xl bg-black text-white font-semibold flex items-center justify-center gap-2 disabled:opacity-40 transition"
         >
-          {loading ? "Uploading..." : "Continue"}
+          {loading ? (
+  <CircleDashed className="text-white animate-spin" size={20} />
+) : (
+  "Continue"
+)}
         </motion.button>
       </motion.div>
     </div>
