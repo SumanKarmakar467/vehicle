@@ -1,39 +1,39 @@
-import {v2 as cloudinary} from 'cloudinary'
+import { v2 as cloudinary } from "cloudinary";
 
 cloudinary.config({
-    cloud_name:process.env.CLOUDINARY_CLOUD_NAME,
-    api_key:process.env.CLOUDINARY_API_KEY,
-    api_secret:process.env.CLOUDINARY_API_SECRET
-})
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
+  api_key: process.env.CLOUDINARY_API_KEY!,
+  api_secret: process.env.CLOUDINARY_API_SECRET!,
+});
 
-const uploadOnCloudinary= async(file:Blob):Promise<string | null> => {
-    if(!file){
-        return null
-    }
-    try{
-        const arrayBuffer= await file.arrayBuffer()
-        const buffer=Buffer.from(arrayBuffer)
+export { cloudinary };
 
-        return new Promise((resolve, reject) => {
-            const uploadStream=cloudinary.uploader.upload_stream({
-                resource_type:"auto"
-            },(error,result) =>{
-                if(error){
-                    reject(error)
-                }
-                else{
-                    resolve(result?.secure_url ?? null)
-                }
-            })
-            uploadStream.end(buffer)
-        })
+export async function uploadOnCloudinary(
+  file: Blob
+): Promise<string | null> {
+  try {
+    console.log("File Type:", file.type);
+    console.log("File Size:", file.size);
 
-        
-    }
-    catch(error){
-        console.log(error)
-        return null
-    }
+    const arrayBuffer = await file.arrayBuffer();
+
+    const base64 = Buffer.from(arrayBuffer).toString("base64");
+
+    const dataURI = `data:${file.type};base64,${base64}`;
+
+    const result = await cloudinary.uploader.upload(dataURI, {
+  folder: "vehicle-documents",
+  resource_type: "image",
+});
+
+    console.log("Cloudinary Upload Success:", result.secure_url);
+
+    return result.secure_url;
+  } catch (error) {
+    console.error(
+  "Cloudinary Upload Error:",
+  JSON.stringify(error, null, 2)
+);
+    return null;
+  }
 }
-
-export default uploadOnCloudinary
