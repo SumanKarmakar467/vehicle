@@ -4,18 +4,21 @@ import Footer from "@/components/Footer";
 import Nav from "@/components/Nav";
 import PartnerDashboard from "@/components/PartnerDashboard";
 import PublicHome from "@/components/PublicHome";
+import connectDb from "@/lib/db";
+import User from "@/models/user.model";
 import Image from "next/image"
 
 export default async function Home() {
   const session = await auth();
 
-  console.log("PAGE SESSION:", session?.user?.role);
+  await connectDb()
+  const user=await User.findOne({email:session?.user?.email})
 
   return (
     <div className="w-full min-h-screen bg-white">
       <Nav/>
 
-      {session?.user?.role == "partner" ? 
+      {user?.role == "partner" ? 
         <PartnerDashboard />
        : session?.user?.role == "admin" ? 
         <AdminDashboard />
