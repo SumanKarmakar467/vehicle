@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import {
   ArrowLeft,
@@ -66,6 +66,45 @@ const Page = () => {
       setLoading(false);
     }
   };
+
+
+useEffect(() => {
+  const handleGetBank = async () => {
+    try {
+      const { data } = await axios.get(
+        "/api/partner/onboarding/bank"
+      );
+
+      console.log(data);
+
+      setAccountHolder(
+        data.partnerBank?.accountHolder || ""
+      );
+
+      setAccountNumber(
+        data.partnerBank?.accountNumber || ""
+      );
+
+      setIfsc(
+        data.partnerBank?.ifsc || ""
+      );
+
+      setUpi(
+        data.partnerBank?.upi || ""
+      );
+
+      setMobileNumber(
+        data.mobileNumber || ""
+      );
+    } catch (error: any) {
+      if (error.response?.status !== 404) {
+        console.error(error);
+      }
+    }
+  };
+
+  handleGetBank();
+}, []);
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-4">

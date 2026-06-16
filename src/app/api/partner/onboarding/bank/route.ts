@@ -74,9 +74,15 @@ export async function POST(req: NextRequest) {
 
     await user.save();
 
-    return Response.json(partnerBank, {
-      status: 201,
-    });
+    return Response.json(
+      {
+        partnerBank,
+        mobileNumber: user.mobileNumber,
+      },
+      {
+        status: 201,
+      }
+    );
   } catch (error) {
     console.error("Partner bank error:", error);
 
@@ -91,7 +97,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     await connectDb();
 
@@ -126,9 +132,15 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    return Response.json(partnerBank, {
-      status: 200,
-    });
+    return Response.json(
+      {
+        partnerBank,
+        mobileNumber: user.mobileNumber,
+      },
+      {
+        status: 200,
+      }
+    );
   } catch (error) {
     console.error("Get partner bank error:", error);
 
