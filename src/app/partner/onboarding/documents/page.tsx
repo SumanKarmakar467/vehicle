@@ -29,47 +29,46 @@ const Page = () => {
     }));
   };
 
-const handleDocs = async () => {
-  setError("");
+  const handleDocs = async () => {
+    setError("");
 
-  if (!docs.aadhar || !docs.license || !docs.rc) {
-    setError("Please upload all required documents.");
-    return;
-  }
+    if (!docs.aadhar || !docs.license || !docs.rc) {
+      setError("Please upload all required documents.");
+      return;
+    }
 
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const formData = new FormData();
+      const formData = new FormData();
 
-    formData.append("aadhar", docs.aadhar);
-    formData.append("license", docs.license);
-    formData.append("rc", docs.rc);
+      formData.append("aadhar", docs.aadhar);
+      formData.append("license", docs.license);
+      formData.append("rc", docs.rc);
 
-    const { data } = await axios.post(
-      "/api/partner/onboarding/documents",
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
+      const { data } = await axios.post(
+        "/api/partner/onboarding/documents",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         },
-      }
-    );
+      );
 
-    console.log(data);
+      console.log(data);
 
-    router.push("/partner/onboarding/vehicle");
-  } catch (error: any) {
-    console.error(error);
+      router.push("/partner/onboarding/vehicle");
+    } catch (error: any) {
+      console.error(error);
 
-    setError(
-      error?.response?.data?.message ??
-        "Failed to upload documents."
-    );
-  } finally {
-    setLoading(false);
-  }
-};
+      setError(error?.response?.data?.message ?? "Failed to upload documents.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const isCompleted=docs.aadhar && docs.license && docs.rc
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-4">
@@ -106,14 +105,16 @@ const handleDocs = async () => {
           >
             <div>
               <p className="text-sm font-semibold">Aadhaar / ID Proof</p>
-              <p className="text-xs text-gray-500">
-                Government-issued ID
-              </p>
+              <p className="text-xs text-gray-500">Government-issued ID</p>
             </div>
 
             <div className="flex items-center gap-3">
-              <span className="text-xs text-gray-400">
-                {docs.aadhar ? docs.aadhar.name : "Upload"}
+              <span
+                className={`text-xs font-medium ${
+                  docs.aadhar ? "text-green-600" : "text-gray-400"
+                }`}
+              >
+                {docs.aadhar ? "Uploaded ✓" : "Upload"}
               </span>
 
               <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
@@ -138,14 +139,16 @@ const handleDocs = async () => {
           >
             <div>
               <p className="text-sm font-semibold">Driving License</p>
-              <p className="text-xs text-gray-500">
-                Valid driving license
-              </p>
+              <p className="text-xs text-gray-500">Valid driving license</p>
             </div>
 
             <div className="flex items-center gap-3">
-              <span className="text-xs text-gray-400">
-                {docs.license ? docs.license.name : "Upload"}
+              <span
+                className={`text-xs font-medium ${
+                  docs.license ? "text-green-600" : "text-gray-400"
+                }`}
+              >
+                {docs.license ? "Uploaded ✓" : "Upload"}
               </span>
 
               <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
@@ -170,14 +173,16 @@ const handleDocs = async () => {
           >
             <div>
               <p className="text-sm font-semibold">Vehicle RC</p>
-              <p className="text-xs text-gray-500">
-                Registration Certificate
-              </p>
+              <p className="text-xs text-gray-500">Registration Certificate</p>
             </div>
 
             <div className="flex items-center gap-3">
-              <span className="text-xs text-gray-400">
-                {docs.rc ? docs.rc.name : "Upload"}
+              <span
+                className={`text-xs font-medium ${
+                  docs.rc ? "text-green-600" : "text-gray-400"
+                }`}
+              >
+                {docs.rc ? "Uploaded ✓" : "Upload"}
               </span>
 
               <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
@@ -189,9 +194,7 @@ const handleDocs = async () => {
               type="file"
               hidden
               accept="image/*,.pdf"
-              onChange={(e) =>
-                handleImage("rc", e.target.files?.[0] || null)
-              }
+              onChange={(e) => handleImage("rc", e.target.files?.[0] || null)}
             />
           </motion.label>
         </div>
@@ -206,24 +209,22 @@ const handleDocs = async () => {
 
         {/* Error Message */}
         {error && (
-          <p className="mt-4 text-center text-sm text-red-500">
-            {error}
-          </p>
+          <p className="mt-4 text-center text-sm text-red-500">{error}</p>
         )}
 
         {/* Submit Button */}
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.97 }}
-          disabled={loading}
+          disabled={!isCompleted ||loading}
           onClick={handleDocs}
           className="mt-8 w-full h-14 rounded-2xl bg-black text-white font-semibold flex items-center justify-center gap-2 disabled:opacity-40 transition"
         >
           {loading ? (
-  <CircleDashed className="text-white animate-spin" size={20} />
-) : (
-  "Continue"
-)}
+            <CircleDashed className="text-white animate-spin" size={20} />
+          ) : (
+            "Continue"
+          )}
         </motion.button>
       </motion.div>
     </div>
