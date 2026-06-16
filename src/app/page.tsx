@@ -6,22 +6,28 @@ import PartnerDashboard from "@/components/PartnerDashboard";
 import PublicHome from "@/components/PublicHome";
 import connectDb from "@/lib/db";
 import User from "@/models/user.model";
-import Image from "next/image";
 
 export default async function Home() {
   const session = await auth();
 
-  await connectDb();
-  const user = await User.findOne({ email: session?.user?.email });
+  let user = null;
+
+  if (session?.user?.email) {
+    await connectDb();
+
+    user = await User.findOne({
+      email: session.user.email,
+    });
+  }
 
   return (
     <div className="w-full min-h-screen bg-white">
-      {user?.role == "partner" ? (
+      {user?.role === "partner" ? (
         <>
           <Nav />
           <PartnerDashboard />
         </>
-      ) : session?.user?.role == "admin" ? (
+      ) : user?.role === "admin" ? (
         <AdminDashboard />
       ) : (
         <>
@@ -29,6 +35,7 @@ export default async function Home() {
           <PublicHome />
         </>
       )}
+
       <Footer />
     </div>
   );
