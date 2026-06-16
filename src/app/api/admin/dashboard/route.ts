@@ -35,7 +35,7 @@ export async function GET(req:NextRequest){
             email:p.email,
             vehicleType:vehicleTypeMap.get(String(p._id))
     }))
-    return NextResponse.json({totalPartners, totalApprovedPartners, totalPendingPartners, totalRejectedPartners,pendingPartnersReviews},{status:200})
+    return NextResponse.json({stats:{totalPartners, totalApprovedPartners, totalPendingPartners, totalRejectedPartners},pendingPartnersReviews},{status:200})
 
     }
     catch(error){
