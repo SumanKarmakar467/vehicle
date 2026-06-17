@@ -265,7 +265,7 @@ function Page() {
               <motion.div
               initial={{scale:0.9}}
               animate={{scale:1}}
-              className="bg-white rounde-3xl p-6 w-full max-w-sm"
+              className="bg-white rounded-3xl p-6 w-full max-w-sm"
               >
               <h2 className="text-lg font-bold">Approve Partner?</h2>
               <p className="text-sm text-gray-500 mt-2">Confirm all informatioon has been verified.</p>
