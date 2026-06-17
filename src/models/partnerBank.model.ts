@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 // type vehicleType=
 //     "bike" | "car" | "loading" | "truck" | "auto";
 
-interface IPartnerBank {
+export interface IPartnerBank {
   owner: mongoose.Types.ObjectId;
   accountHolder: string;
   accountNumber: string;
