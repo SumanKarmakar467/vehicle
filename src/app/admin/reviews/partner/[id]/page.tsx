@@ -20,6 +20,8 @@ import {
 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import { AnimatePresence } from "framer-motion";
+
 
 function Page() {
   const router = useRouter();
@@ -38,6 +40,9 @@ function Page() {
 
   const [partnerBank, setPartnerBank] =
     useState<IPartnerBank | null>(null);
+  const [showApprove, setShowApprove]=useState(false)
+  const [showReject, setShowReject]=useState(false)
+
 
   const handleGetPartner = async () => {
     try {
@@ -236,8 +241,8 @@ function Page() {
                 Verify documents carefully before approving.
               </p>
               <div className="flex flex-col gap-4">
-                <button className="py-3 rounded-2xl bg-linear-to-r from-black to-gray-800 text-white font semibold hover:opacity-90 transition">Approved</button>
-                <button className="py-3 rounded-2xl border font-semibold hover:bg-gray-100 transition">
+                <button className="py-3 rounded-2xl bg-linear-to-r from-black to-gray-800 text-white font semibold hover:opacity-90 transition" onClick={()=>setShowApprove(true)}>Approved</button>
+                <button className="py-3 rounded-2xl border font-semibold hover:bg-gray-100 transition" onClick={()=>setShowReject(true)}>
                   Reject
                 </button>
 
@@ -247,8 +252,35 @@ function Page() {
           )}
         </div>
       </main>
+
+      {
+        <AnimatePresence>
+          {showApprove && (
+            <motion.div
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center px-4"
+            initial={{opacity:0}}
+            animate={{opacity:1}}
+            exit={{opacity:0}}
+            >
+              <motion.div
+              initial={{scale:0.9}}
+              animate={{scale:1}}
+              className="bg-white rounded-3xl p-6 w-full max-w-sm"
+              >
+              <h2 className="text-lg font-bold">Approve Partner?</h2>
+              <p className="text-sm text-gray-500 mt-2">Confirm all informatioon has been verified.</p>
+              <div className="flex gap-3 mt-6">
+                <button className="flex-1 py-2 rounded-xl border" onClick={()=>setShowApprove(false)}>Cancel</button>
+                <button className="flex-1 py-2 rounded-xl bg-black text-white">Yes, Approve</button>
+              </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <AnimatePresence
+      }
     </div>
-  );
+  )
 }
 
 export default Page;
