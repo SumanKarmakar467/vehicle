@@ -26,8 +26,7 @@ const AuthModal = ({ open, onClose }: PropType) => {
   const [err, setErr] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
 
-  const session= useSession();
-  console.log(session);
+  const { data, status } = useSession();
 
   // sign up function logic
   const handleSignUp = async () => {
@@ -41,9 +40,15 @@ const AuthModal = ({ open, onClose }: PropType) => {
       setStep("otp")
       setLoading(false);
     } catch (error: any) {
-      setLoading(false);
-      setErr(error.response.data.message ?? "something went wrong");
-    }
+  console.log("SIGNUP ERROR:", error?.response?.data);
+
+  setLoading(false);
+
+  setErr(
+    error?.response?.data?.message ||
+    "Registration failed"
+  );
+}
   };
 
   // verify email useing OTP Logic 
@@ -67,15 +72,33 @@ const AuthModal = ({ open, onClose }: PropType) => {
 
   // login function logic 
   const handleLogin = async () => {
+  try {
     setLoading(true);
+    setErr("");
+
     const res = await signIn("credentials", {
       email,
       password,
       redirect: false,
     });
+
     setLoading(false);
-    console.log(res);
-  };
+
+    if (res?.error) {
+      setErr(res.error);
+      return;
+    }
+
+    if (res?.ok) {
+      onClose();
+      window.location.reload();
+    }
+  } catch (error) {
+    setLoading(false);
+    setErr("Login failed");
+    console.log(error);
+  }
+};
 
   // google log in function logic 
   const handleGoogleLogin = async () => {
@@ -108,7 +131,7 @@ const AuthModal = ({ open, onClose }: PropType) => {
   if (!open) return null;
 
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       {/* Backdrop */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -165,6 +188,7 @@ const AuthModal = ({ open, onClose }: PropType) => {
                 key="login"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
                 className="mt-4 space-y-4"
               >
                 <h1 className="text-xl font-semibold">Welcome Back</h1>
@@ -226,6 +250,7 @@ const AuthModal = ({ open, onClose }: PropType) => {
                 key="signup"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
                 className="mt-4 space-y-4"
               >
                 <h1 className="text-xl font-semibold">Create Account</h1>
