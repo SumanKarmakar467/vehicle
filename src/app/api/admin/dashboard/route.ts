@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
 console.log("ALL PARTNERS:", allPartners);
 
    const pendingPartnerUsers = await User.find({
-  partnerOnBoardingSteps: 3,
+  partnerOnBoardingSteps: {$gte:3},
 });
 
 console.log("TEST:", pendingPartnerUsers);

@@ -26,7 +26,7 @@ function Page() {
   const router = useRouter();
   const params = useParams();
 
-  const id = params.id as string;
+  const id = String(params.id);
 
   const [data, setData] = useState<IUser | null>(null);
   const [loading, setLoading] = useState(true);
@@ -37,7 +37,8 @@ function Page() {
 
   const [partnerBank, setPartnerBank] = useState<IPartnerBank | null>(null);
   const [showApprove, setShowApprove] = useState(false);
-  const [showReject, setShowReject] = useState(false);
+const [showReject, setShowReject] = useState(false);
+const [rejectionReason, setRejectionReason] = useState("");
 
   const handleGetPartner = async () => {
     try {
@@ -77,6 +78,43 @@ function Page() {
       </div>
     );
   }
+
+  const handleApprove = async () => {
+  try {
+    const { data } = await axios.get(
+      `/api/admin/reviews/partner/${id}/approve`
+    );
+
+    console.log(data);
+
+    setShowApprove(false);
+    router.back();
+  } catch (error) {
+    console.log(error);
+  }
+};
+  const handleReject = async () => {
+  if (!rejectionReason.trim()) {
+    alert("Rejection reason is required");
+    return;
+  }
+
+  try {
+    const { data } = await axios.post(
+      `/api/admin/reviews/partner/${id}/reject`,
+      {
+        rejectionReason,
+      }
+    );
+
+    console.log(data);
+
+    setShowReject(false);
+    router.back();
+  } catch (error) {
+    console.log(error);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200">
@@ -188,152 +226,124 @@ function Page() {
             </div>
           </AnimatedCard>
 
-          {data?.partnerStatus == "pending" && (
+{data?.partnerStatus === "pending" && (
+  <motion.div
+    initial={{ opacity: 0, y: 30 }}
+    animate={{ opacity: 1, y: 0 }}
+    className="bg-white rounded-[32px] p-8 shadow-xl space-y-6"
+  >
+    <div className="flex items-center gap-2 font-semibold">
+      <ShieldCheck size={18} />
+      Admin Check
+    </div>
+
+    <p className="text-sm text-gray-500">
+      Verify documents carefully before approving.
+    </p>
+
+    <div className="flex flex-col gap-4">
+      <button
+        className="py-3 rounded-2xl bg-gradient-to-r from-black to-gray-800 text-white font-semibold hover:opacity-90 transition"
+        onClick={() => setShowApprove(true)}
+      >
+        Approve
+      </button>
+
+      <button
+        className="py-3 rounded-2xl border font-semibold hover:bg-gray-100 transition"
+        onClick={() => setShowReject(true)}
+      >
+        Reject
+      </button>
+    </div>
+  </motion.div>
+)}
+        </div>
+      </main>
+
+
+      <AnimatePresence>
+        {showApprove && (
+          <motion.div
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center px-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-[32px] p-8 shasow-xl space-y-6"
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              className="bg-white rounded-3xl p-6 w-full max-w-sm"
             >
-              <div className="flex items-center gap-2 font-semibold ">
-                <ShieldCheck size={18} />
-                Admin Chcek
-              </div>
-              <p className="text-sm text-gray-500">
-                Verify documents carefully before approving.
+              <h2 className="text-lg font-bold">Approve Partner?</h2>
+
+              <p className="text-sm text-gray-500 mt-2">
+                Confirm all information has been verified.
               </p>
-              <div className="flex flex-col gap-4">
+
+              <div className="flex gap-3 mt-6">
                 <button
-                  className="py-3 rounded-2xl bg-linear-to-r from-black to-gray-800 text-white font semibold hover:opacity-90 transition"
-                  onClick={() => setShowApprove(true)}
+                  className="flex-1 py-2 rounded-xl border"
+                  onClick={() => setShowApprove(false)}
                 >
-                  Approved
+                  Cancel
                 </button>
+
                 <button
-                  className="py-3 rounded-2xl border font-semibold hover:bg-gray-100 transition"
-                  onClick={() => setShowReject(true)}
+                  className="flex-1 py-2 rounded-xl bg-black text-white"
+                  onClick={handleApprove}
+                >
+                  Yes, Approve
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {showReject && (
+          <motion.div
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center px-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              className="bg-white rounded-3xl p-6 w-full max-w-md"
+            >
+              <h2 className="text-lg font-bold text-red-600">
+                Reject Partner?
+              </h2>
+
+              <textarea
+                placeholder="Enter rejection reason (required)"
+                className="w-full mt-3 border rounded-xl p-3 text-sm"
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+              />
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  className="flex-1 py-2 rounded-xl border"
+                  onClick={() => setShowReject(false)}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  className="flex-1 py-2 rounded-xl bg-red-600 text-white"
+                  onClick={handleReject}
                 >
                   Reject
                 </button>
               </div>
             </motion.div>
-          )}
-        </div>
-      </main>
-
-      {
-        <AnimatePresence>
-          {showApprove && (
-            <motion.div
-              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center px-4"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <motion.div
-                initial={{ scale: 0.9 }}
-                animate={{ scale: 1 }}
-                exit={{ scale: 0.9 }}
-                className="bg-white rounded-3xl p-6 w-full max-w-sm"
-              >
-                <h2 className="text-lg font-bold">Approve Partner?</h2>
-
-                <p className="text-sm text-gray-500 mt-2">
-                  Confirm all information has been verified.
-                </p>
-
-                <div className="flex gap-3 mt-6">
-                  <button
-                    className="flex-1 py-2 rounded-xl border"
-                    onClick={() => setShowApprove(false)}
-                  >
-                    Cancel
-                  </button>
-
-                  <button className="flex-1 py-2 rounded-xl bg-black text-white">
-                    Yes, Approve
-                  </button>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-
-          {showReject && (
-            <motion.div
-              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center px-4"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <motion.div
-                initial={{ scale: 0.9 }}
-                animate={{ scale: 1 }}
-                exit={{ scale: 0.9 }}
-                className="bg-white rounded-3xl p-6 w-full max-w-sm"
-              >
-                <h2 className="text-lg font-bold text-red-600">
-                  Reject Partner?
-                </h2>
-
-                <p className="text-sm text-gray-500 mt-2">
-                  This action cannot be undone.
-                </p>
-
-                <div className="flex gap-3 mt-6">
-                  <button
-                    className="flex-1 py-2 rounded-xl border"
-                    onClick={() => setShowReject(false)}
-                  >
-                    Cancel
-                  </button>
-
-                  <button className="flex-1 py-2 rounded-xl bg-red-600 text-white">
-                    Yes, Reject
-                  </button>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      }
-
-       <AnimatePresence>
-        {showReject && (
-            <motion.div
-              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center px-4"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <motion.div
-                initial={{ scale: 0.9 }}
-                animate={{ scale: 1 }}
-                exit={{ scale: 0.9 }}
-                className="bg-white rounded-3xl p-6 w-full max-w-sm"
-              >
-                <h2 className="text-lg font-bold text-red-600">
-                  Reject Partner?
-                </h2>
-
-                <p className="text-sm text-gray-500 mt-2">
-                  <textarea placeholder="Enter rejection reason (required)" className="w-full mt-3 border rounded0xl p-3 text-sm"/>
-                </p>
-
-                <div className="flex gap-3 mt-6">
-                  <button
-                    className="flex-1 py-2 rounded-xl border"
-                    onClick={() => setShowReject(false)}
-                  >
-                    Cancel
-                  </button>
-
-                  <button className="flex-1 py-2 rounded-xl bg-red-600 text-white">
-                    Reject
-                  </button>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-       </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

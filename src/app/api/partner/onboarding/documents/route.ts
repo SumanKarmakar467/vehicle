@@ -76,6 +76,10 @@ export async function POST(req: NextRequest) {
       licenseUrl,
       rcUrl,
     });
+    if(user.partnerOnBoardingSteps<2){
+      user.partnerOnBoardingSteps=2
+    }
+    user.partnerStatus="pending"
 
     return Response.json(
       {
