@@ -5,7 +5,7 @@ import Vehicle from "@/models/vehicle.model";
 import { NextRequest } from "next/server";
 
 const VEHICLE_REGEX = /^[A-Z]{2}[0-9]{1,2}[A-Z]{0,2}[0-9]{4}$/;
-export async function POST(req: Requet) {
+export async function POST(req: Request) {
   try {
     await connectDb();
     const session = await auth();
