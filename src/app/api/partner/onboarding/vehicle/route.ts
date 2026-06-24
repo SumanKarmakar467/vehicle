@@ -5,7 +5,7 @@ import Vehicle from "@/models/vehicle.model";
 import { NextRequest } from "next/server";
 
 const VEHICLE_REGEX = /^[A-Z]{2}[0-9]{1,2}[A-Z]{0,2}[0-9]{4}$/;
-export async function POST(req: Request) {
+export async function POST(req: Requet) {
   try {
     await connectDb();
     const session = await auth();
@@ -47,7 +47,7 @@ export async function POST(req: Request) {
       vehicle.vehicleModel = vehicleModel;
       vehicle.status = "pending";
       await vehicle.save();
-
+        if(user.partnerOnBoardingSteps < 2)
       return Response.json(vehicle, { status: 200 });
     }
 
