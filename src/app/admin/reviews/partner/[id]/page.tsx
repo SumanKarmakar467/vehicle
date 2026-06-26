@@ -12,6 +12,7 @@ import {
   ArrowLeft,
   Car,
   CheckCircle,
+  CircleDashed,
   Clock,
   FileText,
   Landmark,
@@ -37,8 +38,10 @@ function Page() {
 
   const [partnerBank, setPartnerBank] = useState<IPartnerBank | null>(null);
   const [showApprove, setShowApprove] = useState(false);
-const [showReject, setShowReject] = useState(false);
-const [rejectionReason, setRejectionReason] = useState("");
+  const [showReject, setShowReject] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState("");
+  const [approveLoading, setApproveLoading] = useState(false);
+  const [rejectLoading, setRejectLoading] = useState(false);
 
   const handleGetPartner = async () => {
     try {
@@ -80,41 +83,45 @@ const [rejectionReason, setRejectionReason] = useState("");
   }
 
   const handleApprove = async () => {
-  try {
-    const { data } = await axios.get(
-      `/api/admin/reviews/partner/${id}/approve`
-    );
+    setApproveLoading(true);
+    try {
+      const { data } = await axios.get(
+        `/api/admin/reviews/partner/${id}/approve`,
+      );
 
-    console.log(data);
-
-    setShowApprove(false);
-    router.back();
-  } catch (error) {
-    console.log(error);
-  }
-};
+      console.log(data);
+      setApproveLoading(false);
+      setShowApprove(false);
+      router.push("/");
+    } catch (error) {
+      console.log(error);
+      setApproveLoading(false);
+    }
+  };
   const handleReject = async () => {
-  if (!rejectionReason.trim()) {
-    alert("Rejection reason is required");
-    return;
-  }
+    setRejectLoading(true);
+    if (!rejectionReason.trim()) {
+      alert("Rejection reason is required");
+      return;
+    }
 
-  try {
-    const { data } = await axios.post(
-      `/api/admin/reviews/partner/${id}/reject`,
-      {
-        rejectionReason,
-      }
-    );
+    try {
+      const { data } = await axios.post(
+        `/api/admin/reviews/partner/${id}/reject`,
+        {
+          rejectionReason,
+        },
+      );
 
-    console.log(data);
-
-    setShowReject(false);
-    router.back();
-  } catch (error) {
-    console.log(error);
-  }
-};
+      console.log(data);
+      setRejectLoading(false);
+      setShowReject(false);
+      router.push("/");
+    } catch (error) {
+      console.log(error);
+      setRejectLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200">
@@ -226,41 +233,40 @@ const [rejectionReason, setRejectionReason] = useState("");
             </div>
           </AnimatedCard>
 
-{data?.partnerStatus === "pending" && (
-  <motion.div
-    initial={{ opacity: 0, y: 30 }}
-    animate={{ opacity: 1, y: 0 }}
-    className="bg-white rounded-[32px] p-8 shadow-xl space-y-6"
-  >
-    <div className="flex items-center gap-2 font-semibold">
-      <ShieldCheck size={18} />
-      Admin Check
-    </div>
+          {data?.partnerStatus === "pending" && (
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white rounded-[32px] p-8 shadow-xl space-y-6"
+            >
+              <div className="flex items-center gap-2 font-semibold">
+                <ShieldCheck size={18} />
+                Admin Check
+              </div>
 
-    <p className="text-sm text-gray-500">
-      Verify documents carefully before approving.
-    </p>
+              <p className="text-sm text-gray-500">
+                Verify documents carefully before approving.
+              </p>
 
-    <div className="flex flex-col gap-4">
-      <button
-        className="py-3 rounded-2xl bg-gradient-to-r from-black to-gray-800 text-white font-semibold hover:opacity-90 transition"
-        onClick={() => setShowApprove(true)}
-      >
-        Approve
-      </button>
+              <div className="flex flex-col gap-4">
+                <button
+                  className="py-3 rounded-2xl bg-gradient-to-r from-black to-gray-800 text-white font-semibold hover:opacity-90 transition"
+                  onClick={() => setShowApprove(true)}
+                >
+                  Approve
+                </button>
 
-      <button
-        className="py-3 rounded-2xl border font-semibold hover:bg-gray-100 transition"
-        onClick={() => setShowReject(true)}
-      >
-        Reject
-      </button>
-    </div>
-  </motion.div>
-)}
+                <button
+                  className="py-3 rounded-2xl border font-semibold hover:bg-gray-100 transition"
+                  onClick={() => setShowReject(true)}
+                >
+                  Reject
+                </button>
+              </div>
+            </motion.div>
+          )}
         </div>
       </main>
-
 
       <AnimatePresence>
         {showApprove && (
@@ -291,10 +297,11 @@ const [rejectionReason, setRejectionReason] = useState("");
                 </button>
 
                 <button
-                  className="flex-1 py-2 rounded-xl bg-black text-white"
+                  className="flex-1 py-2 flex items-center justify-center rounded-xl bg-black text-white"
                   onClick={handleApprove}
+                  disabled={approveLoading}
                 >
-                  Yes, Approve
+                  {approveLoading?<CircleDashed className="text-white animate-spin"/>:"Yes, Approve"}
                 </button>
               </div>
             </motion.div>
@@ -334,10 +341,11 @@ const [rejectionReason, setRejectionReason] = useState("");
                 </button>
 
                 <button
-                  className="flex-1 py-2 rounded-xl bg-red-600 text-white"
+                  className="flex-1 py-2 flex items-center justify-center rounded-xl bg-red-600 text-white"
                   onClick={handleReject}
+                  disabled={rejectLoading}
                 >
-                  Reject
+                  {rejectLoading?<CircleDashed className="text-white animate-spin"/>:"Reject"}
                 </button>
               </div>
             </motion.div>
