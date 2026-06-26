@@ -42,28 +42,33 @@ function Page() {
   const [rejectionReason, setRejectionReason] = useState("");
   const [approveLoading, setApproveLoading] = useState(false);
   const [rejectLoading, setRejectLoading] = useState(false);
-
-  const handleGetPartner = async () => {
-    try {
-      const response = await axios.get(`/api/admin/reviews/partner/${id}`);
-
-      setData(response?.data?.partner ?? null);
-      setVehicleDetails(response?.data?.vehicle ?? null);
-      setPartnerDocs(response?.data?.documents ?? null);
-      setPartnerBank(response?.data?.bank ?? null);
-
-      console.log(response.data);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [actionError, setActionError] = useState("");
 
   useEffect(() => {
-    if (id) {
-      handleGetPartner();
-    }
+    let ignore = false;
+
+    axios
+      .get(`/api/admin/reviews/partner/${id}`)
+      .then((response) => {
+        if (ignore) return;
+
+        setData(response?.data?.partner ?? null);
+        setVehicleDetails(response?.data?.vehicle ?? null);
+        setPartnerDocs(response?.data?.documents ?? null);
+        setPartnerBank(response?.data?.bank ?? null);
+
+        console.log(response.data);
+      })
+      .catch((error) => {
+        if (!ignore) console.log(error);
+      })
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+
+    return () => {
+      ignore = true;
+    };
   }, [id]);
 
   if (loading) {
@@ -84,8 +89,9 @@ function Page() {
 
   const handleApprove = async () => {
     setApproveLoading(true);
+    setActionError("");
     try {
-      const { data } = await axios.get(
+      const { data } = await axios.post(
         `/api/admin/reviews/partner/${id}/approve`,
       );
 
@@ -93,15 +99,22 @@ function Page() {
       setApproveLoading(false);
       setShowApprove(false);
       router.push("/");
-    } catch (error) {
+    } catch (error: unknown) {
       console.log(error);
+      setActionError(
+        axios.isAxiosError(error)
+          ? error.response?.data?.message ?? "Approve failed"
+          : "Approve failed",
+      );
       setApproveLoading(false);
     }
   };
   const handleReject = async () => {
     setRejectLoading(true);
+    setActionError("");
     if (!rejectionReason.trim()) {
       alert("Rejection reason is required");
+      setRejectLoading(false);
       return;
     }
 
@@ -117,11 +130,22 @@ function Page() {
       setRejectLoading(false);
       setShowReject(false);
       router.push("/");
-    } catch (error) {
+    } catch (error: unknown) {
       console.log(error);
+      setActionError(
+        axios.isAxiosError(error)
+          ? error.response?.data?.message ?? "Reject failed"
+          : "Reject failed",
+      );
       setRejectLoading(false);
     }
   };
+
+  const needsApproval =
+    data.partnerStatus !== "approved" ||
+    vehicleDetails?.status !== "approved" ||
+    partnerDocs?.status !== "approved" ||
+    partnerBank?.status !== "verified";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200">
@@ -233,7 +257,7 @@ function Page() {
             </div>
           </AnimatedCard>
 
-          {data?.partnerStatus === "pending" && (
+          {needsApproval && (
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -247,6 +271,10 @@ function Page() {
               <p className="text-sm text-gray-500">
                 Verify documents carefully before approving.
               </p>
+
+              {actionError && (
+                <p className="text-sm text-red-500">{actionError}</p>
+              )}
 
               <div className="flex flex-col gap-4">
                 <button

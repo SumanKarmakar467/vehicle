@@ -43,7 +43,7 @@ export async function GET(
 
     const documents = await PartnerDocs.findOne({
       owner: partnerId,
-    });
+    }).sort({ updatedAt: -1 });
 
     const bank = await PartnerBank.findOne({
       owner: partnerId,

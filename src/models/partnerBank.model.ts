@@ -36,7 +36,7 @@ const partnerBankSchema = new mongoose.Schema<IPartnerBank>(
     },
     upi: {
       type: String,
-      required: true,
+      default: "N/A",
     },
     status: {
       type: String,

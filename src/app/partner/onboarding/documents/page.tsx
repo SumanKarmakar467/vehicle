@@ -1,12 +1,19 @@
 "use client";
 
-import React, { useState } from "react";
+import DocPreview from "@/components/DocPreview";
+import React, { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { ArrowLeft, CircleDashed, FileCheck, UploadCloud } from "lucide-react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 
 type DocsType = "aadhar" | "license" | "rc";
+
+type ExistingDocs = {
+  aadharUrl?: string;
+  licenseUrl?: string;
+  rcUrl?: string;
+};
 
 const Page = () => {
   const router = useRouter();
@@ -19,6 +26,7 @@ const Page = () => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [existingDocs, setExistingDocs] = useState<ExistingDocs | null>(null);
 
   const handleImage = (doc: DocsType, file: File | null) => {
     if (!file) return;
@@ -32,7 +40,7 @@ const Page = () => {
   const handleDocs = async () => {
     setError("");
 
-    if (!docs.aadhar || !docs.license || !docs.rc) {
+    if (!existingDocs && (!docs.aadhar || !docs.license || !docs.rc)) {
       setError("Please upload all required documents.");
       return;
     }
@@ -42,9 +50,9 @@ const Page = () => {
 
       const formData = new FormData();
 
-      formData.append("aadhar", docs.aadhar);
-      formData.append("license", docs.license);
-      formData.append("rc", docs.rc);
+      if (docs.aadhar) formData.append("aadhar", docs.aadhar);
+      if (docs.license) formData.append("license", docs.license);
+      if (docs.rc) formData.append("rc", docs.rc);
 
       const { data } = await axios.post(
         "/api/partner/onboarding/documents",
@@ -58,17 +66,42 @@ const Page = () => {
 
       console.log(data);
 
-      router.push("/partner/onboarding/vehicle");
-    } catch (error: any) {
+      router.push("/partner/onboarding/bank");
+    } catch (error: unknown) {
       console.error(error);
 
-      setError(error?.response?.data?.message ?? "Failed to upload documents.");
+      setError(
+        axios.isAxiosError(error)
+          ? error.response?.data?.message ?? "Failed to upload documents."
+          : "Failed to upload documents.",
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const isCompleted=docs.aadhar && docs.license && docs.rc
+  useEffect(() => {
+    const handleGetDocs = async () => {
+      try {
+        const { data } = await axios.get("/api/partner/onboarding/documents");
+        setExistingDocs(data.partnerDocs ?? null);
+      } catch (error: unknown) {
+        if (!axios.isAxiosError(error) || error.response?.status !== 404) {
+          console.error(error);
+          setError(
+            axios.isAxiosError(error)
+              ? error.response?.data?.message ?? "Failed to load documents."
+              : "Failed to load documents.",
+          );
+        }
+      }
+    };
+
+    handleGetDocs();
+  }, []);
+
+  const isCompleted =
+    Boolean(existingDocs) || Boolean(docs.aadhar && docs.license && docs.rc)
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-4">
@@ -98,6 +131,14 @@ const Page = () => {
 
         {/* Upload Fields */}
         <div className="mt-8 space-y-5">
+          {existingDocs && (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <DocPreview label="Aadhaar" url={existingDocs.aadharUrl} />
+              <DocPreview label="Driving License" url={existingDocs.licenseUrl} />
+              <DocPreview label="Vehicle RC" url={existingDocs.rcUrl} />
+            </div>
+          )}
+
           {/* Aadhaar */}
           <motion.label
             whileHover={{ scale: 1.02 }}
@@ -111,7 +152,9 @@ const Page = () => {
             <div className="flex items-center gap-3">
               <span
                 className={`text-xs font-medium ${
-                  docs.aadhar ? "text-green-600" : "text-gray-400"
+                  docs.aadhar || existingDocs?.aadharUrl
+                    ? "text-green-600"
+                    : "text-gray-400"
                 }`}
               >
                 {docs.aadhar ? "Uploaded ✓" : "Upload"}
@@ -145,7 +188,9 @@ const Page = () => {
             <div className="flex items-center gap-3">
               <span
                 className={`text-xs font-medium ${
-                  docs.license ? "text-green-600" : "text-gray-400"
+                  docs.license || existingDocs?.licenseUrl
+                    ? "text-green-600"
+                    : "text-gray-400"
                 }`}
               >
                 {docs.license ? "Uploaded ✓" : "Upload"}
@@ -179,7 +224,9 @@ const Page = () => {
             <div className="flex items-center gap-3">
               <span
                 className={`text-xs font-medium ${
-                  docs.rc ? "text-green-600" : "text-gray-400"
+                  docs.rc || existingDocs?.rcUrl
+                    ? "text-green-600"
+                    : "text-gray-400"
                 }`}
               >
                 {docs.rc ? "Uploaded ✓" : "Upload"}

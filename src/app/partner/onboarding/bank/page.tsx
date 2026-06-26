@@ -54,13 +54,14 @@ const Page = () => {
 
       console.log(data);
 
-      router.push("/partner/dashboard");
-    } catch (error: any) {
+      router.push("/");
+    } catch (error: unknown) {
       console.error(error);
 
       setError(
-        error?.response?.data?.message ||
-          "Something went wrong"
+        axios.isAxiosError(error)
+          ? error.response?.data?.message || "Something went wrong"
+          : "Something went wrong"
       );
     } finally {
       setLoading(false);
@@ -96,8 +97,8 @@ useEffect(() => {
       setMobileNumber(
         data.mobileNumber || ""
       );
-    } catch (error: any) {
-      if (error.response?.status !== 404) {
+    } catch (error: unknown) {
+      if (!axios.isAxiosError(error) || error.response?.status !== 404) {
         console.error(error);
       }
     }

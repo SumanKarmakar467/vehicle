@@ -9,6 +9,7 @@ type ContentItem = {
   _id: string;
   name: string;
   email: string;
+  videoKycStatus?: "not_required" | "pending" | "in_progress" | "approved" | "rejected";
 };
 
 type ContentListProps = {
@@ -17,9 +18,19 @@ type ContentListProps = {
 };
 
 function ContentList({ data, type }: ContentListProps) {
+  const router = useRouter();
 
-  const router=useRouter()
-  if (data?.length === 0) {
+  const handleNavigation = (id: string) => {
+    if (type === "partner") {
+      router.push(`/admin/reviews/partner/${id}`);
+    } else if (type === "kyc") {
+      router.push(`/admin/reviews/kyc/${id}`);
+    } else {
+      router.push(`/admin/reviews/vehicle/${id}`);
+    }
+  };
+
+  if (!data || data.length === 0) {
     return (
       <motion.div
         initial={{ opacity: 0 }}
@@ -58,12 +69,24 @@ function ContentList({ data, type }: ContentListProps) {
       </div>
 
       {data.map((item, index) => {
-        const name = item.name;
-        const email = item.email;
+        const { _id, name, email, videoKycStatus } = item;
+
+        let buttonText = "Review";
+
+        if (
+          type === "kyc" &&
+          (!videoKycStatus ||
+            videoKycStatus === "pending" ||
+            videoKycStatus === "not_required")
+        ) {
+          buttonText = "Start Video KYC";
+        } else if (videoKycStatus === "in_progress") {
+          buttonText = "Join Call";
+        }
 
         return (
           <motion.div
-            key={item._id}
+            key={_id}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.05 }}
@@ -74,12 +97,10 @@ function ContentList({ data, type }: ContentListProps) {
             className="bg-white border border-gray-100 rounded-2xl px-5 py-4 shadow-sm transition-shadow"
           >
             <div className="flex items-center justify-between w-full gap-4">
-              {/* Left Side */}
+              {/* Left */}
               <div className="flex items-center gap-3 min-w-0">
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold shrink-0 bg-purple-100 text-purple-800">
-                  {name?.charAt(0)?.toUpperCase() || (
-                    <User size={14} />
-                  )}
+                  {name ? name.charAt(0).toUpperCase() : <User size={14} />}
                 </div>
 
                 <div className="min-w-0">
@@ -93,21 +114,17 @@ function ContentList({ data, type }: ContentListProps) {
                 </div>
               </div>
 
-              {/* Right Side */}
+              {/* Right */}
               <motion.button
                 whileTap={{ scale: 0.96 }}
-                onClick={() => {
-  if (type === "partner") {
-    router.push(`/admin/reviews/partner/${item._id}`);
-  } else if (type === "kyc") {
-    router.push(`/admin/reviews/kyc/${item._id}`);
-  } else {
-    router.push(`/admin/reviews/vehicle/${item._id}`);
-  }
-}}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-neutral-950 hover:bg-neutral-800 text-white text-sm font-semibold transition-colors shrink-0"
+                onClick={() => handleNavigation(_id)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm font-semibold transition-colors shrink-0 ${
+                  videoKycStatus === "in_progress"
+                    ? "bg-blue-600 hover:bg-blue-700"
+                    : "bg-neutral-950 hover:bg-neutral-800"
+                }`}
               >
-                Review
+                {buttonText}
                 <ArrowRight size={15} />
               </motion.button>
             </div>

@@ -49,9 +49,13 @@ const Page = () => {
       console.log(data);
 
       // Next step
-      router.push("/partner/dashboard");
-    } catch (error: any) {
-      setError(error?.response?.data?.message ?? "Something went wrong");
+      router.push("/partner/onboarding/documents");
+    } catch (error: unknown) {
+      setError(
+        axios.isAxiosError(error)
+          ? error.response?.data?.message ?? "Something went wrong"
+          : "Something went wrong",
+      );
     } finally {
       setLoading(false);
     }
@@ -62,23 +66,21 @@ const Page = () => {
       try {
         setError("");
 
-        if (!vehicleType || !vehicleNumber || !vehicleModel) {
-          setError("Please fill all vehicle details");
-          return;
-        }
-
         setLoading(true);
 
         const { data } = await axios.get("/api/partner/onboarding/vehicle");
 
         setVehicleType(data.type)
         setVehicleNumber(data.number)
-        setVehicleModel(data.Vehiclemodel)
-
-        // Next step
-        router.push("/partner/dashboard");
-      } catch (error: any) {
-        setError(error?.response?.data?.message ?? "Something went wrong");
+        setVehicleModel(data.vehicleModel)
+      } catch (error: unknown) {
+        if (!axios.isAxiosError(error) || error.response?.status !== 404) {
+          setError(
+            axios.isAxiosError(error)
+              ? error.response?.data?.message ?? "Something went wrong"
+              : "Something went wrong",
+          );
+        }
       } finally {
         setLoading(false);
       }
@@ -103,7 +105,7 @@ const Page = () => {
             <ArrowLeft size={18} />
           </button>
 
-          <p className="text-xs text-gray-500 font-medium">Step 3 of 3</p>
+          <p className="text-xs text-gray-500 font-medium">Step 1 of 3</p>
 
           <h1 className="text-2xl font-bold mt-1">Vehicle Details</h1>
 

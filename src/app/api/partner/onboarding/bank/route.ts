@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
         accountHolder,
         accountNumber,
         ifsc,
-        upi,
+        upi: upi?.trim() || "N/A",
         status: "added",
       },
       {

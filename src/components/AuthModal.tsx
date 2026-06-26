@@ -2,12 +2,11 @@
 
 import React, { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { CircleDashed, Lock, Mail, User, X } from "lucide-react";
+import { CircleDashed, Eye, EyeOff, Lock, Mail, User, X } from "lucide-react";
 import axios from "axios";
-import { signIn, useSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import Image from "next/image";
 // import { Globe } from "lucide-react";
-Image;
 
 type PropType = {
   open: boolean;
@@ -25,28 +24,28 @@ const AuthModal = ({ open, onClose }: PropType) => {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-
-  const { data, status } = useSession();
+  const [showPassword, setShowPassword] = useState(false);
 
   // sign up function logic
   const handleSignUp = async () => {
     setLoading(true);
     try {
-      const { data } = await axios.post("/api/auth/register", {
+      await axios.post("/api/auth/register", {
         name,
         email,
         password,
       });
       setStep("otp")
       setLoading(false);
-    } catch (error: any) {
-  console.log("SIGNUP ERROR:", error?.response?.data);
+    } catch (error: unknown) {
+  console.log("SIGNUP ERROR:", axios.isAxiosError(error) ? error.response?.data : error);
 
   setLoading(false);
 
   setErr(
-    error?.response?.data?.message ||
-    "Registration failed"
+    axios.isAxiosError(error)
+      ? error.response?.data?.message || "Registration failed"
+      : "Registration failed"
   );
 }
   };
@@ -55,7 +54,7 @@ const AuthModal = ({ open, onClose }: PropType) => {
   const handleVerifyEmail = async () => {
     setLoading(true);
     try {
-      const { data } = await axios.post("/api/auth/verify-email", {
+      await axios.post("/api/auth/verify-email", {
         email,
         otp:otp.join("")
       });
@@ -64,9 +63,13 @@ const AuthModal = ({ open, onClose }: PropType) => {
       setErr("")
       setStep("login")
       setLoading(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
       setLoading(false);
-      setErr(error.response.data.message ?? "something went wrong");
+      setErr(
+        axios.isAxiosError(error)
+          ? error.response?.data?.message ?? "something went wrong"
+          : "something went wrong",
+      );
     }
   };
 
@@ -209,12 +212,20 @@ const AuthModal = ({ open, onClose }: PropType) => {
                   <Lock size={18} className="text-gray-500" />
 
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     placeholder="Password"
                     className="w-full bg-transparent outline-none text-sm"
                     onChange={(e) => setPassword(e.target.value)}
                     value={password}
                   />
+                  <button
+                    type="button"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    onClick={() => setShowPassword((value) => !value)}
+                    className="text-gray-500 hover:text-black transition"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
                 </div>
 
                 <button
@@ -233,7 +244,7 @@ const AuthModal = ({ open, onClose }: PropType) => {
                 </button>
 
                 <p className="mt-6 text-center text-sm text-gray-500">
-                  Don't have an account?{" "}
+                  Don&apos;t have an account?{" "}
                   <button
                     type="button"
                     onClick={() => setStep("signup")}
@@ -283,12 +294,20 @@ const AuthModal = ({ open, onClose }: PropType) => {
                   <Lock size={18} className="text-gray-500" />
 
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     placeholder="Password"
                     className="w-full bg-transparent outline-none text-sm"
                     onChange={(e) => setPassword(e.target.value)}
                     value={password}
                   />
+                  <button
+                    type="button"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    onClick={() => setShowPassword((value) => !value)}
+                    className="text-gray-500 hover:text-black transition"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
                 </div>
 
                 {err && <p className="text-red-500 ">*{err}</p>}

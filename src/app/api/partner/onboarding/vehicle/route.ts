@@ -2,7 +2,6 @@ import { auth } from "@/auth";
 import connectDb from "@/lib/db";
 import User from "@/models/user.model";
 import Vehicle from "@/models/vehicle.model";
-import { NextRequest } from "next/server";
 
 const VEHICLE_REGEX = /^[A-Z]{2}[0-9]{1,2}[A-Z]{0,2}[0-9]{4}$/;
 export async function POST(req: Request) {
@@ -39,7 +38,7 @@ export async function POST(req: Request) {
     const vehicleNumber = number.toUpperCase();
     
 
-    let vehicle = await Vehicle.findOne({ owner: session.user._id });
+    let vehicle = await Vehicle.findOne({ owner: user._id });
 
     if (vehicle) {
       vehicle.type = type;
@@ -91,7 +90,7 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     await connectDb();
     const session = await auth();
@@ -106,17 +105,16 @@ export async function GET(req: NextRequest) {
       return Response.json({ message: "user not found" }, { status: 400 });
     }
 
-    let vehicle = await Vehicle.findOne({ owner: user._id});
+    const vehicle = await Vehicle.findOne({ owner: user._id});
 
     if(vehicle){
         return Response.json(vehicle, { status: 200 });
     }
-    else{
-        return null
-    }
+
+    return Response.json({ message: "Vehicle details not found" }, { status: 404 });
 
   } 
   catch (error) {
-    return Response.json({ message: "get vehicle error ${erro}" }, { status: 400 });
+    return Response.json({ message: `get vehicle error ${error}` }, { status: 400 });
   }
 }
