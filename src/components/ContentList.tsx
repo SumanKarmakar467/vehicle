@@ -4,12 +4,18 @@ import React from "react";
 import { motion } from "motion/react";
 import { ArrowRight, CheckCircle, User } from "lucide-react";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 type ContentItem = {
   _id: string;
   name: string;
   email: string;
-  videoKycStatus?: "not_required" | "pending" | "in_progress" | "approved" | "rejected";
+  videoKycStatus?:
+    | "not_required"
+    | "pending"
+    | "in_progress"
+    | "approved"
+    | "rejected";
 };
 
 type ContentListProps = {
@@ -20,13 +26,31 @@ type ContentListProps = {
 function ContentList({ data, type }: ContentListProps) {
   const router = useRouter();
 
-  const handleNavigation = (id: string) => {
-    if (type === "partner") {
-      router.push(`/admin/reviews/partner/${id}`);
-    } else if (type === "kyc") {
+  const handleStartVideoKyc = async (id: string) => {
+    try {
+      const { data } = await axios.get(`/api/admin/video-kyc/start/${id}`);
+
+      console.log(data);
+
       router.push(`/admin/reviews/kyc/${id}`);
-    } else {
-      router.push(`/admin/reviews/vehicle/${id}`);
+    } catch (error) {
+      console.error("Failed to start Video KYC:", error);
+    }
+  };
+
+  const handleNavigation = (id: string) => {
+    switch (type) {
+      case "partner":
+        router.push(`/admin/reviews/partner/${id}`);
+        break;
+
+      case "kyc":
+        router.push(`/admin/reviews/kyc/${id}`);
+        break;
+
+      case "vehicle":
+        router.push(`/admin/reviews/vehicle/${id}`);
+        break;
     }
   };
 
@@ -80,9 +104,22 @@ function ContentList({ data, type }: ContentListProps) {
             videoKycStatus === "not_required")
         ) {
           buttonText = "Start Video KYC";
-        } else if (videoKycStatus === "in_progress") {
+        } else if (type === "kyc" && videoKycStatus === "in_progress") {
           buttonText = "Join Call";
         }
+
+        const handleButtonClick = () => {
+          if (
+            type === "kyc" &&
+            (!videoKycStatus ||
+              videoKycStatus === "pending" ||
+              videoKycStatus === "not_required")
+          ) {
+            handleStartVideoKyc(_id);
+          } else {
+            handleNavigation(_id);
+          }
+        };
 
         return (
           <motion.div
@@ -117,9 +154,9 @@ function ContentList({ data, type }: ContentListProps) {
               {/* Right */}
               <motion.button
                 whileTap={{ scale: 0.96 }}
-                onClick={() => handleNavigation(_id)}
+                onClick={handleButtonClick}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm font-semibold transition-colors shrink-0 ${
-                  videoKycStatus === "in_progress"
+                  type === "kyc" && videoKycStatus === "in_progress"
                     ? "bg-blue-600 hover:bg-blue-700"
                     : "bg-neutral-950 hover:bg-neutral-800"
                 }`}

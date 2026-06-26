@@ -146,32 +146,7 @@ function AdminDashboard() {
           </TapButton>
         </div>
 
-        {/* Tab Content */}
-        {/* <div className="rounded-2xl border bg-white p-6 shadow">
-          {activeTab === "partner" && (
-            <div>
-              <h2 className="font-semibold text-lg mb-4">
-                Partner Reviews ({partnerReviews.length})
-              </h2>
-            </div>
-          )}
-
-          {activeTab === "kyc" && (
-            <div>
-              <h2 className="font-semibold text-lg mb-4">
-                Pending KYC ({pendingKyc.length})
-              </h2>
-            </div>
-          )}
-
-          {activeTab === "vehicle" && (
-            <div>
-              <h2 className="font-semibold text-lg mb-4">
-                Vehicle Reviews ({vehicleReviews.length})
-              </h2>
-            </div>
-          )}
-        </div> */}
+        
 
         <AnimatePresence mode='wait'>
           <motion.div
