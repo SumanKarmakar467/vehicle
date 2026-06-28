@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { useParams } from "next/navigation";
@@ -9,8 +9,19 @@ function page() {
   const { userData } = useSelector((state: RootState) => state.user);
   const containerRef = useRef<HTMLDivElement>(null);
   const joinedRef = useRef(false);
+  const zpRef = useRef<any>(null);
   const [joined, setJoined] = useState(false);
   const { roomid } = useParams<{ roomid: string }>();
+
+  useEffect(() => {
+    return () => {
+      if (zpRef.current) {
+        zpRef.current.destroy();
+        zpRef.current = null;
+      }
+      joinedRef.current = false;
+    };
+  }, []);
 
   const handleJoinCall = async () => {
     if (!containerRef.current || joinedRef.current || !userData?._id) return;
@@ -34,9 +45,9 @@ function page() {
         userData.name || "User",
       );
 
-      const zp = ZegoUIKitPrebuilt.create(kitToken);
+      zpRef.current = ZegoUIKitPrebuilt.create(kitToken);
 
-      zp.joinRoom({
+      zpRef.current.joinRoom({
         container: containerRef.current,
         scenario: {
           mode: ZegoUIKitPrebuilt.OneONoneCall,
