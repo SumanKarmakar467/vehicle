@@ -50,7 +50,7 @@ function AdminDashboard() {
   const handleGetPendingKYC=async() => {
     try{
       const {data} =await axios.get("/api/admin/video-kyc/pending")
-      setPendingKyc(data)
+      setPendingKyc(data.data)
     }
     catch(error){
       console.log(error)

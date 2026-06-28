@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "motion/react";
-import { ArrowRight, CheckCircle, User } from "lucide-react";
+import { ArrowRight, CheckCircle, Loader2, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 
@@ -10,6 +10,7 @@ type ContentItem = {
   _id: string;
   name: string;
   email: string;
+  videoKycRoomId?: string;
   videoKycStatus?:
     | "not_required"
     | "pending"
@@ -25,16 +26,17 @@ type ContentListProps = {
 
 function ContentList({ data, type }: ContentListProps) {
   const router = useRouter();
+  const [loadingId, setLoadingId] = useState<string | null>(null);
 
   const handleStartVideoKyc = async (id: string) => {
     try {
+      setLoadingId(id);
       const { data } = await axios.get(`/api/admin/video-kyc/start/${id}`);
-
-      console.log(data);
-
-      router.push(`/admin/reviews/kyc/${id}`);
+      router.push(`/video-kyc/${data.roomId}`);
     } catch (error) {
       console.error("Failed to start Video KYC:", error);
+    } finally {
+      setLoadingId(null);
     }
   };
 
@@ -43,11 +45,9 @@ function ContentList({ data, type }: ContentListProps) {
       case "partner":
         router.push(`/admin/reviews/partner/${id}`);
         break;
-
       case "kyc":
         router.push(`/admin/reviews/kyc/${id}`);
         break;
-
       case "vehicle":
         router.push(`/admin/reviews/vehicle/${id}`);
         break;
@@ -64,14 +64,8 @@ function ContentList({ data, type }: ContentListProps) {
         <div className="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center mx-auto mb-4">
           <CheckCircle size={22} className="text-green-400" />
         </div>
-
-        <p className="font-bold text-gray-800 text-base">
-          All caught up!
-        </p>
-
-        <p className="text-sm text-gray-400 mt-1">
-          No pending items right now.
-        </p>
+        <p className="font-bold text-gray-800 text-base">All caught up!</p>
+        <p className="text-sm text-gray-400 mt-1">No pending items right now.</p>
       </motion.div>
     );
   }
@@ -86,17 +80,14 @@ function ContentList({ data, type }: ContentListProps) {
             ? "Pending Video KYC Queue"
             : "Vehicle Reviews Queue"}
         </p>
-
-        <p className="text-xs text-gray-400">
-          {data.length} items
-        </p>
+        <p className="text-xs text-gray-400">{data.length} items</p>
       </div>
 
       {data.map((item, index) => {
-        const { _id, name, email, videoKycStatus } = item;
+        const { _id, name, email, videoKycStatus, videoKycRoomId } = item;
+        const isLoading = loadingId === _id;
 
         let buttonText = "Review";
-
         if (
           type === "kyc" &&
           (!videoKycStatus ||
@@ -109,7 +100,9 @@ function ContentList({ data, type }: ContentListProps) {
         }
 
         const handleButtonClick = () => {
-          if (
+          if (type === "kyc" && videoKycStatus === "in_progress" && videoKycRoomId) {
+            router.push(`/video-kyc/${videoKycRoomId}`);
+          } else if (
             type === "kyc" &&
             (!videoKycStatus ||
               videoKycStatus === "pending" ||
@@ -127,42 +120,38 @@ function ContentList({ data, type }: ContentListProps) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.05 }}
-            whileHover={{
-              y: -3,
-              boxShadow: "0 8px 30px rgba(0,0,0,0.08)",
-            }}
+            whileHover={{ y: -3, boxShadow: "0 8px 30px rgba(0,0,0,0.08)" }}
             className="bg-white border border-gray-100 rounded-2xl px-5 py-4 shadow-sm transition-shadow"
           >
             <div className="flex items-center justify-between w-full gap-4">
-              {/* Left */}
               <div className="flex items-center gap-3 min-w-0">
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold shrink-0 bg-purple-100 text-purple-800">
                   {name ? name.charAt(0).toUpperCase() : <User size={14} />}
                 </div>
-
                 <div className="min-w-0">
-                  <p className="font-bold text-sm text-gray-900 truncate">
-                    {name}
-                  </p>
-
-                  <p className="text-xs text-gray-400 truncate">
-                    {email}
-                  </p>
+                  <p className="font-bold text-sm text-gray-900 truncate">{name}</p>
+                  <p className="text-xs text-gray-400 truncate">{email}</p>
                 </div>
               </div>
 
-              {/* Right */}
               <motion.button
                 whileTap={{ scale: 0.96 }}
                 onClick={handleButtonClick}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm font-semibold transition-colors shrink-0 ${
+                disabled={isLoading}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm font-semibold transition-colors shrink-0 disabled:opacity-60 ${
                   type === "kyc" && videoKycStatus === "in_progress"
                     ? "bg-blue-600 hover:bg-blue-700"
                     : "bg-neutral-950 hover:bg-neutral-800"
                 }`}
               >
-                {buttonText}
-                <ArrowRight size={15} />
+                {isLoading ? (
+                  <Loader2 size={15} className="animate-spin" />
+                ) : (
+                  <>
+                    {buttonText}
+                    <ArrowRight size={15} />
+                  </>
+                )}
               </motion.button>
             </div>
           </motion.div>

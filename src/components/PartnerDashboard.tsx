@@ -4,10 +4,11 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { motion } from "motion/react";
-import { Check, Clock, Lock } from "lucide-react";
+import { Check, CheckCheck, Clock, Lock, Video } from "lucide-react";
 import { useRouter } from "next/navigation";
 import RejectionCard from "./RejectionCard";
 import StatusCard from "./StatusCard";
+import ActionCard from "./ActionCard";
 
 type Step = {
   id: number;
@@ -30,7 +31,7 @@ const TOTAL_STEPS = STEPS.length;
 
 function PartnerDashboard() {
   const [activeStep, setActiveStep] = useState(1);
-  const router=useRouter()
+  const router = useRouter();
   const { userData } = useSelector((state: RootState) => state.user);
 
   useEffect(() => {
@@ -39,11 +40,11 @@ function PartnerDashboard() {
     }
   }, [userData]);
 
-  const goToStep=(step:Step)=>{
-    if(step.route && step.id<=activeStep){
-        router.push(step.route)
+  const goToStep = (step: Step) => {
+    if (step.route && step.id <= activeStep) {
+      router.push(step.route);
     }
-  }
+  };
 
   const progressPercentage = ((activeStep - 1) / (TOTAL_STEPS - 1)) * 100;
 
@@ -83,7 +84,7 @@ function PartnerDashboard() {
                   <motion.div
                     key={s.id}
                     whileHover={!locked ? { scale: 1.1 } : {}}
-                    onClick={()=>goToStep(s)}
+                    onClick={() => goToStep(s)}
                     className="flex flex-col items-center z-10 cursor-pointer"
                   >
                     <div
@@ -104,7 +105,9 @@ function PartnerDashboard() {
                         s.id
                       )}
                     </div>
-                    <p className="mt-3 text-sm font-semibold text-center">{s.title}</p>
+                    <p className="mt-3 text-sm font-semibold text-center">
+                      {s.title}
+                    </p>
                   </motion.div>
                 );
               })}
@@ -112,29 +115,55 @@ function PartnerDashboard() {
           </div>
         </div>
 
-        {
-          activeStep===4 && userData?.partnerStatus==='rejected' && (
-            <RejectionCard
+        {activeStep === 4 && userData?.partnerStatus === "rejected" && (
+          <RejectionCard
             title="Partner Rejected"
             reason={userData.rejectionReason}
-            actionLabel={'Review and Update'}
+            actionLabel={"Review and Update"}
             onAction={() => {
-              router.push("/partner/onboarding/vehicle")
+              router.push("/partner/onboarding/vehicle");
             }}
-            />
-          )
-        }
+          />
+        )}
 
-        {
-          activeStep===4 && userData?.partnerStatus==='pending' && (
-            <StatusCard
-            icon={<Clock size={18}/>}
+        {activeStep === 4 && userData?.partnerStatus === "pending" && (
+          <StatusCard
+            icon={<Clock size={18} />}
             title={"Documents Under Review"}
             description={"Admin is Verifying your documents."}
-            />
-          )
+          />
+        )}
 
-        }
+        {
+          
+        activeStep === 5 && userData?.videoKycStatus === "approved" ? (
+          <StatusCard
+            icon={<Check size={18} />}
+            title="Video KYC approved"
+            desc="You can now proceed to pricing"
+          />
+        ) : activeStep === 5 && userData?.videoKycStatus === "rejected" ? (
+          <RejectionCard
+            title="Video KYC rejected"
+            reason={userData?.videoKycRejectionReason}
+            actionLabel="Request Again"
+          />
+        ) : activeStep === 5 &&
+          userData?.videoKycStatus === "in_progress" &&
+          userData?.videoKycRoomId ? (
+          <ActionCard
+            icon={<Video size={18} />}
+            title="Admin Started Video KYC"
+            button="Join Call"
+            onClick={() => router.push(`/video-kyc/${userData.videoKycRoomId}`)}
+          />
+        ) : (
+          <StatusCard
+            icon={<Clock size={18} />}
+            title="Waiting for Admin"
+            desc="Admin will initiate Video KYC shortly"
+          />
+        )}
       </div>
     </div>
   );
