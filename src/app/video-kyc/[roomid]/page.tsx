@@ -4,89 +4,73 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { useParams } from "next/navigation";
 import { Video } from "lucide-react";
+import Image from "next/image";
 
-function page() {
+export default function Page() {
   const { userData } = useSelector((state: RootState) => state.user);
-  const containerRef = useRef<HTMLDivElement>(null);
+  // const containerRef = useRef<HTMLDivElement>(null);
   const joinedRef = useRef(false);
   const zpRef = useRef<any>(null);
   const [joined, setJoined] = useState(false);
   const { roomid } = useParams<{ roomid: string }>();
+  const previewRef = useRef<HTMLVideoElement>(null);
+  const [strem, setStream] = useState<MediaStream | null>(null);
 
   useEffect(() => {
-    return () => {
-      if (zpRef.current) {
-        zpRef.current.destroy();
-        zpRef.current = null;
+    if (joined) return;
+    let localstream: MediaStream;
+    const init = async () => {
+      try {
+        localstream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: true,
+        });
+        console.log(localstream);
+console.log(localstream.getVideoTracks());
+        setStream(localstream);
+        if (previewRef.current) {
+          previewRef.current.srcObject = localstream;
+        }
+        setJoined(true);
+      } catch (error) {
+        console.log(error);
       }
-      joinedRef.current = false;
     };
+    init();
   }, []);
 
-  const handleJoinCall = async () => {
-    if (!containerRef.current || joinedRef.current || !userData?._id) return;
 
-    joinedRef.current = true;
-    setJoined(true);
-
-    try {
-      const { ZegoUIKitPrebuilt } = await import(
-        "@zegocloud/zego-uikit-prebuilt"
-      );
-
-      const appId = Number(process.env.NEXT_PUBLIC_ZEGO_APP_ID);
-      const serverSecret = process.env.NEXT_PUBLIC_ZEGO_APP_SERVER_SECRET;
-
-      const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
-        appId,
-        serverSecret!,
-        roomid,
-        userData._id.toString(),
-        userData.name || "User",
-      );
-
-      zpRef.current = ZegoUIKitPrebuilt.create(kitToken);
-
-      zpRef.current.joinRoom({
-        container: containerRef.current,
-        scenario: {
-          mode: ZegoUIKitPrebuilt.OneONoneCall,
-        },
-        showPreJoinView: false,
-      });
-    } catch (error) {
-      console.log(error);
-      joinedRef.current = false;
-      setJoined(false);
-    }
-  };
 
   return (
-    <div className="relative w-screen h-screen bg-neutral-950">
-      <div ref={containerRef} className="w-full h-full" />
-
-      {!joined && (
-        <div className="absolute inset-0 flex items-center justify-center bg-neutral-950">
-          <div className="flex flex-col items-center gap-6">
-            <div className="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center">
-              <Video size={36} className="text-white" />
-            </div>
-            <div className="text-center text-white">
-              <p className="text-xl font-semibold">Video KYC</p>
-              <p className="text-sm text-white/50 mt-1">Room: {roomid}</p>
-            </div>
-            <button
-              onClick={handleJoinCall}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 transition px-10 py-3 rounded-2xl text-white font-semibold text-base"
-            >
-              <Video size={18} />
-              Click to Join
-            </button>
-          </div>
+    <div className="min-h-screen bg-black text-white flex flex-col">
+      <div className="px-6 py-4 border-b border-white/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <Image src="/logo.png" alt="logo" width={44} height={44} priority />
+          <p className="text-xs text-gray-400">
+            {userData?.role == "admin"
+              ? "Admin Verification"
+              : "Partner Video KYC"}
+          </p>
         </div>
-      )}
+        <div className="flex-1 relative">
+          {joined && (
+            <div className="h-full flex items-center justify-center px-4 py-10">
+              <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-white/5">
+                  <video
+                    ref={previewRef}
+                    autoPlay
+                    muted
+                    playsInline
+                    className="w-full h-[300px] sm:h-[400px] object-cover"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
 
-export default page;
