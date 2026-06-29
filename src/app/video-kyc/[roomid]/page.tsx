@@ -17,7 +17,7 @@ export default function Page() {
   const [strem, setStream] = useState<MediaStream | null>(null);
 
   useEffect(() => {
-    if (joined) return;
+    if (joine\d) return;
     let localstream: MediaStream;
     const init = async () => {
       try {
