@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (["approved", "rejected"].includes(action)) {
+    if (!["approved", "rejected"].includes(action)) {
       return Response.json(
         {
           success: false,
@@ -68,7 +68,10 @@ export async function POST(req: NextRequest) {
       }
       partner.videoKycStatus = "rejected";
       partner.videoKycRejectionReason = reason.trim();
-
+      partner.partnerOnBoardingSteps = Math.max(
+        (partner.partnerOnBoardingSteps ?? 4) - 1,
+        0,
+      );
     }
     await partner.save()
 

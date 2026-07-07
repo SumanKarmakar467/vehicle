@@ -111,7 +111,7 @@ export default function Page() {
   const handleApprove = async () => {
     setALoading(true)
     try {
-      const {data} = await axios.post("/api/admin/video-kyc/complete",{roomid,action:"approved"})
+      const {data} = await axios.post("/api/admin/video-kyc/complete",{roomId:roomid,action:"approved"})
       console.log(data)
       setALoading(false)
     } catch (error:any) {
@@ -122,7 +122,7 @@ export default function Page() {
     const handleReject = async () => {
       setRLoading(true)
     try {
-      const {data} = await axios.post("/api/admin/video-kyc/complete",{roomid,action:"rejected",reason})
+      const {data} = await axios.post("/api/admin/video-kyc/complete",{roomId:roomid,action:"rejected",reason})
       console.log(data)
       setRLoading(false)
     } catch (error:any) {
@@ -350,7 +350,7 @@ export default function Page() {
               className="w-full bg-white/10 border border-white/20 rounded-xl p-3 mb-4 text-sm"/>
               <div className="flex gap-4">
                 <button onClick={()=>setShowRejectionModel(false)} className="flex-1 border rounded-xl py-2">Cancel</button>
-                <button className="flex-1 bg-green-600 rounded-xl py-2" disabled={rLoading} onClick={handleReject}>{rLoading?"Processing...":"Approve"}</button>
+                <button className="flex-1 bg-red-600 rounded-xl py-2" disabled={rLoading} onClick={handleReject}>{rLoading?"Processing...":"Reject"}</button>
               </div>
             </motion.div>
           </motion.div>
