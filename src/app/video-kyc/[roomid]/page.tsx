@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 export default function Page() {
   const { userData } = useSelector((state: RootState) => state.user);
@@ -38,6 +39,7 @@ export default function Page() {
   const [reason, setReason] = useState("")
   const [showApprovalModel, setShowApprovalModel] = useState(false)
   const [showRejectionModel, setShowRejectionModel] = useState(false)
+  const router=useRouter()
 
   useEffect(() => {
     let localStream: MediaStream;
@@ -114,6 +116,7 @@ export default function Page() {
       const {data} = await axios.post("/api/admin/video-kyc/complete",{roomId:roomid,action:"approved"})
       console.log(data)
       setALoading(false)
+      router.push("/")
     } catch (error:any) {
       console.log(error.response.data.message ?? error)
       setALoading(false)
@@ -125,6 +128,7 @@ export default function Page() {
       const {data} = await axios.post("/api/admin/video-kyc/complete",{roomId:roomid,action:"rejected",reason})
       console.log(data)
       setRLoading(false)
+      router.push("/")
     } catch (error:any) {
       console.log(error.response.data.message ?? error)
       setRLoading(false)
@@ -203,11 +207,15 @@ export default function Page() {
           <div className="flex flex-wrap gap-3">
             {userData?.role === "admin" && (
               <>
-                <button onClick={()=>setShowApprovalModel(true)} className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-full text-sm flex items-center gap-2">
+                <button 
+                onClick={()=>setShowApprovalModel(true)} 
+                className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-full text-sm flex items-center gap-2">
                   <CheckCircle size={16} />
                   Approve
                 </button>
-                <button onClick={()=>setShowRejectionModel(true)} className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-full text-sm flex items-center gap-2">
+                <button 
+                onClick={()=>setShowRejectionModel(true) } 
+                className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-full text-sm flex items-center gap-2">
                   <XCircle size={16} />
                   Reject
                 </button>
