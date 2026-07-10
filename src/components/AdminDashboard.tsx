@@ -42,6 +42,7 @@ function AdminDashboard() {
       setPartnerReviews(data.pendingPartnersReviews || []);
       setPendingKyc(data.pendingKyc || []);
       setVehicleReviews(data.vehicleReviews || []);
+      
     } catch (error) {
       console.error("Dashboard Error:", error);
     }

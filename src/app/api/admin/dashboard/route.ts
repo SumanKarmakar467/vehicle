@@ -91,10 +91,28 @@ export async function GET() {
         vehicleType: vehicleTypeMap.get(String(p._id)) || "N/A",
       }));
 
-    const vehicleReviews = await Vehicle.find({ status: "pending" }).populate(
-      "owner",
-      "name email",
-    );
+    const previewVehicles = await Vehicle.find({})
+      .sort({ updatedAt: -1 })
+      .populate("owner", "name email role");
+
+    const vehicleReviews = previewVehicles.map((v) => {
+      const owner = v.owner as unknown as {
+        name?: string;
+        email?: string;
+        role?: string;
+      } | null;
+
+      if (!owner || owner.role !== "partner") {
+        return null;
+      }
+
+      return {
+        _id: v._id,
+        name: owner?.name ?? "Unknown Owner",
+        email: owner?.email ?? "No email available",
+        vehicleType: v.type,
+      };
+    }).filter((vehicle) => vehicle !== null);
 
     return NextResponse.json(
       {

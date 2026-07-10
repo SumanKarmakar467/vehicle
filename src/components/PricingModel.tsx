@@ -1,20 +1,72 @@
-"use Client";
+"use client";
 import { IVehicle } from "@/models/vehicle.model";
+import axios from "axios";
 import { ImagePlus, IndianRupee } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 type PropsType = {
   open: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
   data: IVehicle | null;
 };
 
-function PricingModel({ open, onClose, data }: PropsType) {
-  const [image, setImage] = useState<File | null>();
+function PricingModel({ open, onClose, onSuccess, data }: PropsType) {
+  const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [baseFare, setBaseFare] = useState("");
   const [pricePerKM, setPricePerKM] = useState("");
   const [waitingCharge, setWaitingCharge] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!data) return;
+
+    let ignore = false;
+
+    queueMicrotask(() => {
+      if (ignore) return;
+
+      setPreview(data?.imageUrl || null);
+      setBaseFare(data?.baseFare?.toString() || "");
+      setPricePerKM(data?.pricePerKM?.toString() || "");
+      setWaitingCharge(data?.waitingCharge?.toString() || "");
+    });
+
+    return () => {
+      ignore = true;
+    };
+  }, [data]);
+
+  const handleSubmit = async () => {
+    setLoading(true);
+    onClose();
+
+    try {
+      const formData = new FormData();
+      formData.append("baseFare", baseFare);
+      formData.append("pricePerKM", pricePerKM);
+      formData.append("waitingCharge", waitingCharge);
+
+      if (image) {
+        formData.append("image", image);
+      }
+
+      const response = await axios.post(
+        "/api/partner/onboarding/pricing",
+        formData,
+      );
+
+      console.log("Success:", response.data);
+      await onSuccess?.();
+    } catch (error: unknown) {
+      console.log(
+        axios.isAxiosError(error) ? error.response?.data || error : error,
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <AnimatePresence>
       {open && (
@@ -95,7 +147,10 @@ function PricingModel({ open, onClose, data }: PropsType) {
 
             <div className="p-6 border-t flex gap-3">
                 <button onClick={onClose} className="flex-1 border rounded-xl py-2">Cancel</button>
-                <button className="flex-1 bg-black text-white rounded-xl py-2">Save</button>
+                <button 
+                onClick={handleSubmit}
+                disabled={loading} 
+                className="flex-1 bg-black text-white rounded-xl py-2">{loading?"Saving...":"Save"}</button>
             </div>
           </motion.div>
         </motion.div>

@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import { setUserData } from "@/redux/userSlice";
 import { motion } from "motion/react";
 import { Check, CheckCheck, Clock, Lock, Video } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -35,16 +36,41 @@ const TOTAL_STEPS = STEPS.length;
 function PartnerDashboard() {
   const [activeStep, setActiveStep] = useState(1);
   const router = useRouter();
+  const dispatch = useDispatch();
   const { userData } = useSelector((state: RootState) => state.user);
   const [requestLoading, setRequestLoading] = useState(false)
   const [showPricing, setShowPricing] = useState(false)
-  const [ vehicleData, setVehicleData] = useState<IVehicle | null >()
+  const [ vehicleData, setVehicleData] = useState<IVehicle | null>(null)
 
   useEffect(() => {
     if (userData?.partnerOnBoardingSteps) {
       setActiveStep(userData.partnerOnBoardingSteps + 1);
     }
   }, [userData]);
+
+  const handleGetPricing=async() => {
+    try{
+      const {data}=await axios.get("/api/partner/onboarding/pricing")
+      console.log(data)
+      setVehicleData(data)
+    }
+    catch(error){
+      console.log(error)
+    }
+  }
+  useEffect(() => {
+    handleGetPricing()
+  },[])
+
+  const handlePricingSuccess = async () => {
+    await handleGetPricing();
+    try {
+      const { data } = await axios.get("/api/user/me");
+      dispatch(setUserData(data.user));
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const goToStep = (step: Step) => {
     if(step.id==6 && userData?.partnerStatus==="approved" && userData?.videoKycStatus==="approved"){
@@ -180,11 +206,28 @@ function PartnerDashboard() {
               desc="Admin will initiate Video KYC shortly"
             />
           ) : null)}
+
+        {activeStep==7 && vehicleData?.status=="pending" && (
+          <StatusCard
+          icon={<Clock size={20}/>}
+          title="Pricing Under Review"
+          desc="Admin is reviewing your pricing."
+          />
+        )}
+        {activeStep==7 && vehicleData?.status=="rejected" && (
+          <RejectionCard
+          title="Pricing Rejected"
+          reason={vehicleData.rejectionReason}
+          actionLabel="Edit & Resubmit"
+          onAction={() => setShowPricing(true)}
+          />
+        )}
       </div>
 
       <PricingModel
       open={showPricing}
       onClose={() => setShowPricing(false)}
+      onSuccess={handlePricingSuccess}
       data={vehicleData}
       />
     </div>

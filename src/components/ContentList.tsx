@@ -10,6 +10,7 @@ type ContentItem = {
   _id: string;
   name: string;
   email: string;
+  vehicleType?: string;
   videoKycRoomId?: string;
   videoKycStatus?:
     | "not_required"
@@ -84,10 +85,10 @@ function ContentList({ data, type }: ContentListProps) {
       </div>
 
       {data.map((item, index) => {
-        const { _id, name, email, videoKycStatus, videoKycRoomId } = item;
+        const { _id, name, email, vehicleType, videoKycStatus, videoKycRoomId } = item;
         const isLoading = loadingId === _id;
 
-        let buttonText = "Review";
+        let buttonText = type === "vehicle" ? "Preview" : "Review";
         if (
           type === "kyc" &&
           (!videoKycStatus ||
@@ -129,7 +130,14 @@ function ContentList({ data, type }: ContentListProps) {
                   {name ? name.charAt(0).toUpperCase() : <User size={14} />}
                 </div>
                 <div className="min-w-0">
-                  <p className="font-bold text-sm text-gray-900 truncate">{name}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-bold text-sm text-gray-900 truncate">{name}</p>
+                    {type === "vehicle" && vehicleType && (
+                      <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold uppercase text-gray-500">
+                        {vehicleType}
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-gray-400 truncate">{email}</p>
                 </div>
               </div>
