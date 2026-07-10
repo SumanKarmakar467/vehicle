@@ -108,6 +108,10 @@ const Nav = () => {
                             {userData?.name}
                           </p>
 
+                          <p className="text-sm text-gray-600 break-all">
+                            {userData?.email}
+                          </p>
+
                           <p className="text-xs uppercase text-gray-500 mb-4">
                             {userData?.role}
                           </p>
@@ -249,6 +253,10 @@ const Nav = () => {
             >
               <div className="p-5">
                 <p className="font-semibold text-lg">{userData?.name}</p>
+
+                <p className="text-sm text-gray-600 break-all">
+                  {userData?.email}
+                </p>
 
                 <p className="text-xs uppercase text-gray-500 mb-4">
                   {userData?.role}

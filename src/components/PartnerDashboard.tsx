@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { setUserData } from "@/redux/userSlice";
 import { motion } from "motion/react";
-import { Check, CheckCheck, Clock, Lock, Video } from "lucide-react";
+import { ArrowRight, Check, CheckCheck, Clock, Lock, Video } from "lucide-react";
 import { useRouter } from "next/navigation";
 import RejectionCard from "./RejectionCard";
 import StatusCard from "./StatusCard";
@@ -221,6 +221,27 @@ function PartnerDashboard() {
           actionLabel="Edit & Resubmit"
           onAction={() => setShowPricing(true)}
           />
+        )}
+
+        { activeStep==8 && vehicleData?.status=="approved" && (
+          <motion.div
+          initial={{opacity:0,y:30}}
+          animate={{opacity:1,y:0}}
+          className="bg-black text-white rounded-3xl p-10 shadow-2xl flex items-center gap-4"
+          >
+            <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+              <CheckCheck size={24} />
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold">You&apos;re Live!</h3>
+              <p className="text-gray-300 mt-1">
+                Your onboarding is complete and your vehicle is now active on the platform.
+              </p>
+              <button className="mt-6 bg-white text-black px-6 py-3 rounded-xl font-semibold flex items-center gap-2">
+                  Go to Bookings <ArrowRight size={16}/>
+              </button>
+            </div>
+          </motion.div>
         )}
       </div>
 

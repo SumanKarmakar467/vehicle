@@ -18,6 +18,7 @@ function PricingModel({ open, onClose, onSuccess, data }: PropsType) {
   const [pricePerKM, setPricePerKM] = useState("");
   const [waitingCharge, setWaitingCharge] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     if (!data) return;
@@ -40,7 +41,7 @@ function PricingModel({ open, onClose, onSuccess, data }: PropsType) {
 
   const handleSubmit = async () => {
     setLoading(true);
-    onClose();
+    setErrorMessage("");
 
     try {
       const formData = new FormData();
@@ -58,8 +59,14 @@ function PricingModel({ open, onClose, onSuccess, data }: PropsType) {
       );
 
       console.log("Success:", response.data);
+      onClose();
       await onSuccess?.();
     } catch (error: unknown) {
+      setErrorMessage(
+        axios.isAxiosError(error)
+          ? error.response?.data?.message ?? "Pricing save failed"
+          : "Pricing save failed",
+      );
       console.log(
         axios.isAxiosError(error) ? error.response?.data || error : error,
       );
@@ -143,6 +150,12 @@ function PricingModel({ open, onClose, onSuccess, data }: PropsType) {
                     <input type="text" placeholder="waitingCharge..." value={waitingCharge} onChange={(e)=>setWaitingCharge(e.target.value)} className="w-full outline-none"/>
                 </div>
               </div>
+
+              {errorMessage && (
+                <p className="text-sm font-semibold text-red-600">
+                  {errorMessage}
+                </p>
+              )}
             </div>
 
             <div className="p-6 border-t flex gap-3">

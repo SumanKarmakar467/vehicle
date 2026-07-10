@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import connectDb from "@/lib/db";
+import User from "@/models/user.model";
 import Vehicle from "@/models/vehicle.model";
 import { NextRequest } from "next/server";
 
@@ -26,6 +27,10 @@ export async function POST(
     vehicle.status = "approved";
     vehicle.rejectionReason = undefined;
     await vehicle.save();
+
+    await User.findByIdAndUpdate(vehicle.owner, {
+      partnerOnBoardingSteps: 7,
+    });
 
     return Response.json(
       { success: true, message: "Vehicle pricing approved", vehicle },

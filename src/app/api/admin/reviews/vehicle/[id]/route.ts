@@ -17,10 +17,21 @@ export async function GET(
     await connectDb();
 
     const { id } = await context.params;
-    const vehicle = await Vehicle.findById(id).populate("owner", "name email");
+    const vehicle = await Vehicle.findById(id).populate(
+      "owner",
+      "name email role",
+    );
 
     if (!vehicle) {
       return Response.json({ message: "Vehicle not found" }, { status: 404 });
+    }
+
+    const owner = vehicle.owner as unknown as { role?: string } | null;
+    if (!owner || owner.role !== "partner") {
+      return Response.json(
+        { message: "Vehicle owner is not a valid partner" },
+        { status: 404 },
+      );
     }
 
     return Response.json({ vehicle }, { status: 200 });

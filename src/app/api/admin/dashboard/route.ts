@@ -91,7 +91,15 @@ export async function GET() {
         vehicleType: vehicleTypeMap.get(String(p._id)) || "N/A",
       }));
 
-    const previewVehicles = await Vehicle.find({})
+    const previewVehicles = await Vehicle.find({
+      status: "pending",
+      $or: [
+        { baseFare: { $exists: true } },
+        { pricePerKM: { $exists: true } },
+        { waitingCharge: { $exists: true } },
+        { imageUrl: { $exists: true, $ne: "" } },
+      ],
+    })
       .sort({ updatedAt: -1 })
       .populate("owner", "name email role");
 
