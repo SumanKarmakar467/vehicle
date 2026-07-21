@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import L from "leaflet";
+import { motion } from "motion/react";
 import {
   MapContainer,
   Marker,
@@ -9,6 +10,8 @@ import {
   useMap,
 } from "react-leaflet";
 import axios from "axios";
+import { AnimatePresence } from "framer-motion";
+import { CircleArrowLeft, MapPin, Navigation2 } from "lucide-react";
 type props = {
   pickUp: string;
   drop: string;
@@ -78,7 +81,8 @@ function SearchMap({ pickUp, drop, onChange, onDistance }: props) {
   const [p1, setP1] = useState<[number, number]>();
   const [p2, setP2] = useState<[number, number]>();
   const [route, setRoute] = useState<[number, number][]>([]);
-  const [km, setKm] = useState<number | null>();
+  const [km, setKm] = useState<number | null>(0);
+  const [ready, setReady] = useState(false);
 
   const geoCoding = async (q: string): Promise<[number, number] | null> => {
     try {
@@ -128,6 +132,7 @@ function SearchMap({ pickUp, drop, onChange, onDistance }: props) {
     }
   };
   useEffect(() => {
+    setReady(false);
     if (pickUp && drop) {
       (async () => {
         const a = await geoCoding(pickUp);
@@ -138,6 +143,7 @@ function SearchMap({ pickUp, drop, onChange, onDistance }: props) {
         await loadRoute(a, b);
         setP1(a);
         setP2(b);
+        setReady(true);
       })();
     }
   }, [pickUp, drop]);
@@ -197,6 +203,64 @@ function SearchMap({ pickUp, drop, onChange, onDistance }: props) {
           </>
         )}
       </MapContainer>
+      <button
+        onClick={() => window.history.back()}
+        className="absolute top-4 left-4 z-[1000] w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center"
+      >
+        <CircleArrowLeft />
+      </button>
+
+      <AnimatePresence>
+        {!ready && (
+          <motion.div
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.45 }}
+            className="absolute inset-0 z-[999] bg-white/90 backdrop-blur-md flex flex-col items-center justify-center gap-4"
+          >
+            <div className="relative w-14 h-14 flex items-center justify-center">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1.1, repeat: Infinity, ease: "linear" }}
+                className="absolute inset-0 rounded-full border-2 border-transparent border-t-zinc-900"
+              />
+
+              <motion.div
+                animate={{ rotate: -360 }}
+                transition={{ duration: 1.8, repeat: Infinity, ease: "linear" }}
+                className="absolute inset-2 rounded-full border border-transparent border-t-zinc-300"
+              />
+              <MapPin size={15} className="text-zinc-800" />
+            </div>
+
+            <div className="text-center">
+              <p className="text-zinc-900 text-xs font-black tracking-[0.22em] uppercase">
+                Loading Map
+              </p>
+              <p className="text-zinc-400 text-[10px] font-medium tracking-wider mt-0.5">
+                Plotting Your Route...
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {ready && km !== null && (
+          <motion.div
+            initial={{ opacity: 0, y: 8, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            className="absolute bottom-6 left-4 z-[500] flex items-center gap-2 bg-white border border-zinc-200 px-35 py-2 rounded-xl shadow-lg"
+          >
+            <Navigation2 size={13} className="text-zinc-900" />
+            <span className="text-zinc-900 text-xs font-bold">{km} Km</span>
+            <span className="w-px h-3 bg-zinc-200" />
+            <span>~{Math.max(3, Math.round((km! / 25) * 60))}minutes</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
