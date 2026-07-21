@@ -50,15 +50,16 @@ export default function Page() {
     !!pickUp,
     !!drop,
   ].filter(Boolean).length;
+  const canContinue=!!(vehicle && mobile && pickUp && drop && pickUpLat && pickUpLon && dropLat && dropLon)
 
-  const searchAddress = async (q: string, setResults: (r: Place[]) => void) => {
+  const searchAddress = async (q: string, setResults: (r: Place[]) => void,restrict?:string | null) => {
     try {
       if (!q || q.trim().length < 3) {
         setResults([])
         return;
       }
       const { data } = await axios.get(`https://photon.komoot.io/api/?q=${encodeURIComponent(q.trim())}&limit=8&lang=en`)
-      const results: Place[] = (data.features ?? []).map((f: any) => ({
+      let results: Place[] = (data.features ?? []).map((f: any) => ({
         id:String(f.properties.osm_id),
         name: f.properties.name,
         city: f.properties.city,
@@ -68,7 +69,9 @@ export default function Page() {
         lat: f.geometry.coordinates[1],
         lng: f.geometry.coordinates[0]
       }))
-
+      if(restrict){
+        results=results.filter(r=>r.country==restrict)
+      }
       setResults(results)
     }
     catch (error) {
@@ -143,7 +146,7 @@ export default function Page() {
         </div>
 
         <div className="bg-white rounded-3xl border border-zinc-200 shadow-[0_8px_40px_rgba(0,0,0,0.08)] overflow-visible">
-          <div className="h-1 bg-zinc-900 w-full" />
+          <div className="h-1 bg-zinc-900 w-[90%] m-auto " />
           <div className="p-6 space-y-7">
             <motion.div
               variants={stepVariants}
@@ -346,9 +349,10 @@ export default function Page() {
                       value={drop}
                       onChange={(e) => {
                         setDrop(e.target.value)
-                        searchAddress(e.target.value, setDropSuggestions)
+                        searchAddress(e.target.value, setDropSuggestions,pickUpCountry)
                       }}
-                      placeholder="Drop location"
+                      disabled={!pickUpCountry}
+                      placeholder={pickUpCountry?"Drop location":"Select Pick Up Location First"}
                       className="flex-1 bg-transparent tex-sm font-semibold text-zinc-900 placeholder:text-zinc-400 outline-none"
                     />
                     <Navigation size={14} className="text-zinc-300 flex-shrink-0"/>
@@ -389,6 +393,25 @@ export default function Page() {
                 </div>
               </div>
 
+            </motion.div>
+
+            <motion.div
+            variants={stepVariants} 
+            initial="hidden" 
+            animate="visible" 
+            transition={{delay:0.3}}
+            >
+              <motion.button
+              whileTap={{scale:0.97}}
+              whileHover={canContinue ? {scale :1.02 }:{}}
+              disabled={!canContinue}
+              onClick={()=>{
+                router.push(`/search?pickup=${encodeURIComponent(pickUp)}&drop=${encodeURIComponent(drop)} & vehicle=${vehicle} & mobile=${encodeURIComponent(mobile)} & pickuplat=${pickUpLat} & pickuplon=${pickUpLon} & drop=${dropLat} & drop=${dropLon}`)
+              }}
+              className="w-full h-14 rounded-2xl bg-zinc-900 hover:bg-black disabled:opacity-3 text-white font-black text-sm tracking-wide flex items-center justify-center gap-25 transition-colors shadow-lg disabled:shadow-none"
+              >
+                <span>Continue</span>
+              </motion.button>
             </motion.div>
           </div>
         </div>
