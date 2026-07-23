@@ -19,6 +19,12 @@ export interface IUser extends Document{
     videoKycRejectionReason:string;
     createdAt:Date;
     updatedAt:Date;
+    socketId:string | null;
+    location?:{
+        type:"Point",
+        corrdinates:[number,number]
+    };
+    isOnline:boolean;
 
 }
 
@@ -77,8 +83,27 @@ const userSchema= new mongoose.Schema<IUser>({
     },
     otpExpiresAt:{
         type:Date
+    },
+    socketId:{
+        type:String,
+        default:null
+    },
+    location:{
+        type:{
+            type:String,
+            enum:["Point"]
+        },
+        coordinates:[Number]
+    },
+    isOnline:{
+        type:Boolean,
+        default:false,
+        index1:true
     }
+    
 },{timestamps:true})
+
+userSchema.index({location:"2dsphere"})
 
 const User = mongoose.models.User || mongoose.model("User",userSchema) 
 export default User

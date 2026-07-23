@@ -1,19 +1,33 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { motion } from "motion/react";
 import { Bike, Car, Bus, Truck } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { useRouter } from "next/navigation";
+import { getSocket } from "@/lib/socket";
 
-function HeroSection({
-  onAuthRequired,
-}: {
-  onAuthRequired: () => void;
-}) {
+
+
+function HeroSection({ onAuthRequired }: { onAuthRequired: () => void }) {
   const { userData } = useSelector((state: RootState) => state.user);
   const router = useRouter();
+
+// useEffect(() => {
+//   if (!userData?._id) {
+//     console.log("User ID is not available");
+//     return;
+//   }
+
+//   const socket = getSocket();
+
+//   console.log("Emitting user ID:", userData._id);
+
+//   socket.emit("identity", {
+//     userId: userData._id,
+//   });
+// }, [userData]);
 
   return (
     <div className="relative h-screen w-full overflow-hidden">
@@ -60,9 +74,7 @@ function HeroSection({
           whileTap={{ scale: 0.95 }}
           className="mt-12 px-10 py-4 bg-white text-black rounded-full font-semibold shadow-xl"
           onClick={() => {
-            !userData
-              ? onAuthRequired()
-              : router.push("/user/book");
+            !userData ? onAuthRequired() : router.push("/user/book");
           }}
         >
           Book Now
