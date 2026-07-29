@@ -121,7 +121,7 @@ useEffect(() => {
               <div className="flex flex-col items-center pt-1.5 flex-shrink-0">
                 <div className="w-2.5 h-2.5 rounded-full bg-zinc-900" />
                 <div
-                  className="w-px flex-1 bg-zinc-30 my-1"
+                  className="w-px flex-1 bg-zinc-300 my-1"
                   style={{ minHeight: 14 }}
                 />
               </div>
