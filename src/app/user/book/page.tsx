@@ -468,9 +468,18 @@ export default function Page() {
                 whileHover={canContinue ? { scale: 1.02 } : {}}
                 disabled={!canContinue}
                 onClick={() => {
-                  router.push(
-                    `/user/search?pickup=${encodeURIComponent(pickUp)}&drop=${encodeURIComponent(drop)}&vehicle=${encodeURIComponent(vehicle)}&mobile=${encodeURIComponent(mobile)}&pickuplat=${pickUpLat}&pickuplon=${pickUpLon}&droplat=${dropLat}&droplon=${dropLon}`,
-                  );
+                  const url = `/user/search?pickup=${encodeURIComponent(pickUp)}
+&drop=${encodeURIComponent(drop)}
+&vehicle=${encodeURIComponent(vehicle)}
+&mobile=${encodeURIComponent(mobile)}
+&pickUpLat=${pickUpLat}
+&pickUpLon=${pickUpLon}
+&dropLat=${dropLat}
+&dropLon=${dropLon}`;
+
+                  console.log("URL:", url);
+
+                  router.push(url);
                 }}
                 className="w-full h-14 rounded-2xl bg-zinc-900 hover:bg-black disabled:opacity-3 text-white font-black text-sm tracking-wide flex items-center justify-center gap-25 transition-colors shadow-lg disabled:shadow-none"
               >
