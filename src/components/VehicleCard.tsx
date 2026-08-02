@@ -28,7 +28,7 @@ interface IVehicle{
     createdAt:Date,
     updatedAt:Date
 }
-
+// add 
 function VehicleCard({
   vehicle,
   distance,
