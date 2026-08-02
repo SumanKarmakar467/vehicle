@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { IVehicle, vehicleType } from "@/models/vehicle.model";
 import SearchMap from "@/components/SearchMap";
+import VehicleCard from "@/components/VehicleCard";
 import axios, { Axios } from "axios";
 
 const VEHICLE_META:any ={
@@ -14,20 +15,35 @@ const VEHICLE_META:any ={
   loading: { label : "Loading",  Icon: Truck  },
   truck: { label : "Truck",  Icon: Truck  },
 };
+interface IVehicle{
+    owner:string,
+    type:vehicleType,
+    vehicleModel:string,
+    number:string,
+    imageUrl?:string,
+    baseFare?:number,
+    pricePerKM?:number,
+    waitingCharge?:number,
+    status:"approved" | "pending" | "rejected";
+    rejectionReason?:string
+    isActive:boolean,
+    createdAt:Date,
+    updatedAt:Date
+}
 
 function page() {
   const router = useRouter();
   const params = useSearchParams();
   const [pickUp, setPickUp] = useState(params.get("pickup") || "");
   const [drop, setDrop] = useState(params.get("drop") || "");
-  const [km, setKm] = useState<number>();
+  const [km, setKm] = useState<number>(0);
   const mobile = params.get("mobile");
   const pickUpLat = params.get("pickUpLat");
   const pickUpLon = params.get("pickUpLon");
   const dropLat = params.get("dropLat");
   const dropLon = params.get("dropLon");
   const vehicle = params.get("vehicle") || "";
-  const [vehicles , setVehicles]=useState<IVehicle[] >([])
+  const [vehicles , setVehicles]=useState<IVehicle[]>([])
   const [loading, setLoading]= useState(false)
   const meta=VEHICLE_META[vehicle];
 
@@ -211,13 +227,13 @@ useEffect(() => {
                   <p className="text-zinc-900 font-bold text-base mb-1">Vehicles Not Found</p>
                   <p className="text-zinc-400 text-sm max-w-xs leading-relaxed">{meta?.label || "Vehicle"} drivers are avaialble near your pickup right now.</p>
 
-                  <motion.div 
+                  <motion.button 
                   whileTap={{scale:0.95}}
                   onClick={()=>getNearByVehicles(pickUpLat,pickUpLon,vehicle,pickUp)}
                   className="mt-5 flex items-center gap-2 bg-zinc-900 text-white text-sm font-semibold px-6 py-2.5 rounded-xl hover:bg-zinc-800 transition-colors"
                   >
                     <RefreshCcw size={14}/> Retry Search
-                  </motion.div>
+                  </motion.button>
                 </motion.div>
     
               )}
@@ -231,14 +247,39 @@ useEffect(() => {
                 animate={{opacity:1,y:0}}
                 transition={{delay:i*0.06, duration:0.38, ease:[0.22, 1, 0.36, 1]}}
                 >
-                  
+                  <VehicleCard
+                  vehicle={v}
+                  distance={km}
+                  onBook={
+                    () => {
+                      const url=new URLSearchParams({
+                        pickUp,
+                        drop,
+                        vehicle:v.type,
+                        driverId:v.owner,
+                        fare:String(v.baseFare! + v.pricePerKM! * km),
+                        pickUpLat:String(pickUpLat),
+                        pickUpLon:String(pickUpLon),
+                        dropLat:String(dropLat),
+                        dropLon:String(dropLon),
+                        moblie:String(mobile)
+                      })
+                      router.push(`/checkout?${url.toString()}`)
+                    }
+                  }
+                  />
                 </motion.div>
               ))}
             </div>
-        </div>
 
+
+        </div>
+              
+        
 
       </motion.div>
+
+
     </div>
   );
 }

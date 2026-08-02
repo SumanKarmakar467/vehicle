@@ -8,9 +8,9 @@ export async function POST(req: NextRequest) {
     await connectDb();
     const { latitude, longitude, vehicleType } = await req.json();
     console.log("Received:");
-console.log(latitude);
-console.log(longitude);
-console.log(vehicleType);
+    console.log(latitude);
+    console.log(longitude);
+    console.log(vehicleType);
     if (!latitude || !longitude) {
       return NextResponse.json(
         { message: "Coordinates not found" },
@@ -33,10 +33,7 @@ console.log(vehicleType);
     });
     const partnersIds = partners.map((p) => p._id);
     if (partnersIds.length == 0) {
-      return NextResponse.json(
-        [],
-        { status: 200 },
-      );
+      return NextResponse.json([], { status: 200 });
     }
     const vehicles = await Vehicle.find({
       owner: { $in: partnersIds },
