@@ -257,7 +257,7 @@ useEffect(() => {
                         drop,
                         vehicle:v.type,
                         driverId:v.owner,
-                        fare:String(v.baseFare! + v.pricePerKM! * km),
+                        fare:String(Math.round(v.baseFare! + (v.pricePerKM! * km))),
                         pickUpLat:String(pickUpLat),
                         pickUpLon:String(pickUpLon),
                         dropLat:String(dropLat),

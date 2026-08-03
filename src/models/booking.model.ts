@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
-type BookingStatus="requested"
+type BookingStatus="idle"
+    | "requested"
     | "awaiting_payment"
     | "confirmed"
     | "started"
@@ -96,7 +97,8 @@ const bookingSchema= new mongoose.Schema<IBooking>({
     },
     bookingStatus:{
         type:String,
-        enum:["requested"
+        enum:["idle"
+            , "requested"
             , "awaiting_payment"
             , "confirmed"
             , "started"
@@ -104,7 +106,7 @@ const bookingSchema= new mongoose.Schema<IBooking>({
             , "cancelled"
             , "rejected"
             , "expired"],
-        default:"requested"
+        default:"idle"
     },
     paymentStatus:{
         type:String,
