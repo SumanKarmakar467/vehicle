@@ -264,7 +264,7 @@ useEffect(() => {
                         dropLon:String(dropLon),
                         moblie:String(mobile)
                       })
-                      router.push(`/checkout?${url.toString()}`)
+                      router.push(`/user/checkout?${url.toString()}`)
                     }
                   }
                   />
