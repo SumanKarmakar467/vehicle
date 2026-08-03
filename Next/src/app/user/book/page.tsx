@@ -470,7 +470,7 @@ export default function Page() {
                 onClick={() => {
                   const url = `/user/search?pickup=${encodeURIComponent(pickUp)}
 &drop=${encodeURIComponent(drop)}
-&vehicle=${encodeURIComponent(vehicle)}
+&vehicle=${encodeURIComponent(vehicle ?? "")}
 &mobile=${encodeURIComponent(mobile)}
 &pickUpLat=${pickUpLat}
 &pickUpLon=${pickUpLon}

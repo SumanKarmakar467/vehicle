@@ -52,26 +52,28 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(existing);
     }
     const booking = await Booking.create({
-          user:mongoose.Types.ObjectId
-          driver:mongoose.Types.ObjectId
-          vehicle:mongoose.Types.ObjectId
-      
-          pickUpAddress:string
-          dropAddress:string
-      
-          pickUpLocation:{
-              type:"Point",
-              coordinates:[number, number]
-          }
-          dropLocation:{
-              type:"Point",
-              coordinates:[number, number]
-          }
-          fare:number
-          userMobileNumber:string
-          driverMobileNumber:string
-      
-          bookingStatus:BookingStatus
+      user: session.user.id,
+      driver: driverId,
+      vehicle: vehicleId,
+
+      pickUpAddress: pickupAddress,
+      dropAddress: dropAddress,
+
+      pickUpLocation: pickupLocation,
+      dropLocation: dropLocation,
+
+      fare,
+      userMobileNumber: mobileNumber,
+      driverMobileNumber: driver.mobileNumber,
+
+      bookingStatus: "requested",
     });
-  } catch (error) {}
+
+    return NextResponse.json(booking, { status: 201 });
+  } catch (error) {
+    return NextResponse.json(
+      { message: "something went wrong" },
+      { status: 500 },
+    );
+  }
 }

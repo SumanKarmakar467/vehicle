@@ -2,9 +2,10 @@
 import { ArrowLeft, Bike, Car, MapPin, Navigation, RefreshCcw, Search, Truck, Zap } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
-import { IVehicle, vehicleType } from "@/models/vehicle.model";
-import SearchMap from "@/components/SearchMap";
+import React, { Suspense, useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+import { vehicleType } from "@/models/vehicle.model";
+const SearchMap = dynamic(() => import("@/components/SearchMap"), { ssr: false });
 import VehicleCard from "@/components/VehicleCard";
 import axios, { Axios } from "axios";
 
@@ -31,7 +32,7 @@ interface IVehicle{
     updatedAt:Date
 }
 
-function page() {
+function SearchContent() {
   const router = useRouter();
   const params = useSearchParams();
   const [pickUp, setPickUp] = useState(params.get("pickup") || "");
@@ -229,7 +230,7 @@ useEffect(() => {
 
                   <motion.button 
                   whileTap={{scale:0.95}}
-                  onClick={()=>getNearByVehicles(pickUpLat,pickUpLon,vehicle,pickUp)}
+                  onClick={()=>getNearByVehicles(Number(pickUpLat),Number(pickUpLon),vehicle)}
                   className="mt-5 flex items-center gap-2 bg-zinc-900 text-white text-sm font-semibold px-6 py-2.5 rounded-xl hover:bg-zinc-800 transition-colors"
                   >
                     <RefreshCcw size={14}/> Retry Search
@@ -284,4 +285,10 @@ useEffect(() => {
   );
 }
 
-export default page;
+export default function page() {
+  return (
+    <Suspense fallback={null}>
+      <SearchContent />
+    </Suspense>
+  );
+}

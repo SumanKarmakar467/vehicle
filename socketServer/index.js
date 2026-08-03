@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import http from "http";
 import { Server } from "socket.io";
-import User from "./modls/user.model.js";
+import User from "./models/user.model.js";
 
 dotenv.config();
 

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
   ArrowRight,
@@ -32,7 +32,7 @@ type Status =
   | "payment"
   | "confirmed";
 
-function page() {
+function CheckoutContent() {
   const router = useRouter();
   const params = useSearchParams();
   const [pickUp, setPickUp] = useState(params.get("pickUp") || "");
@@ -238,4 +238,10 @@ function page() {
   );
 }
 
-export default page;
+export default function page() {
+  return (
+    <Suspense fallback={null}>
+      <CheckoutContent />
+    </Suspense>
+  );
+}
