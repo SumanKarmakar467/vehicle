@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 //     "bike" | "car" | "loading" | "truck" | "auto";
 
 export interface IPartnerBank {
-  owner: mongoose.Types.ObjectId;
+  owner: mongoose.Types.ObjctId;
   accountHolder: string;
   accountNumber: string;
   ifsc: string;
