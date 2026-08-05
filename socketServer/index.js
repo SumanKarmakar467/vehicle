@@ -13,7 +13,7 @@ const mongodbUrl = process.env.MONGO_URL;
 const connectDb = async () => {
   try {
     await mongoose.connect(mongodbUrl);
-    console.log("MongoDb Conect...");
+    console.log("MongoDb Connect...");
   } catch (error) {
     console.log("MongoDb Error", error);
   }
