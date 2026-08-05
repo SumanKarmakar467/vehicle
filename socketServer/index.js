@@ -8,7 +8,7 @@ import User from "./models/user.model.js";
 dotenv.config();
 
 const PORT = process.env.PORT || 5000;
-const mongdbUrl = process.env.MONGO_URL;
+const mongodbUrl = process.env.MONGO_URL;
 
 const connectDb = async () => {
   try {
