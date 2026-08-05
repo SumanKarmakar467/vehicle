@@ -51,7 +51,7 @@ io.on("connection", (socket) => {
   socket.on("update-location",async({userId,latitude,longitude}) => {
     await User.findByIdAndUpdate(userId,{
       location:{
-        type:"Pint",
+        type:"Point",
         coordinates:[longitude,latitude]
       }
     })
