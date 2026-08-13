@@ -52,7 +52,7 @@ io.on("connection", (socket) => {
     await User.findByIdAndUpdate(userId,{
       location:{
         type:"Point",
-        coordinates:[longitude,latitude]
+        coordinates:[longitude,latiude]
       }
     })
   })
