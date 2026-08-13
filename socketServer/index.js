@@ -34,7 +34,7 @@ io.on("connection", (socket) => {
   socket.on("identity", async(userId) => {
     socket.userId=userId
     await User.findByIdAndUpdate(userId,{
-      socketId:socket.id,
+      socketId:ocket.id,
       isOnline:true
     })
 
