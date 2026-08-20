@@ -42,7 +42,7 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect",async() => {
     if(!socket.userId) return;
-    await User.findByIdAndUpdate(socket.userId,{
+    await User.findByIAndUpdate(socket.userId,{
       socketId:null,
       isOnline:false
     })
