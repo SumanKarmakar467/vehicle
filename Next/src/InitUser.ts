@@ -11,4 +11,4 @@ function InitUser() {
   return null;
 }
 
-export default InitUser;
+export default InitUse;
