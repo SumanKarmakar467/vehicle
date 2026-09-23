@@ -8,7 +8,7 @@ function InitUser() {
 
   useGetMe(status === "authenticated");
 
-  return nll;
+  return null;
 }
 
 export default InitUser;
