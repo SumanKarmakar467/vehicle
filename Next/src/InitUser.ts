@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import useGetMe from "./hooks/useGetMe";
+import useGetMe from "./hoos/useGetMe";
 
 function InitUser() {
   const { status } = useSession();
